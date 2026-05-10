@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Casey.Joseph.Fertilizer.Calculator</title>
+<style>
+/* ═══════════════════════════ RESET & TOKENS ═══════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+:root{
+  --bg:#F2EFE7;--bg2:#E9E5DB;--bg3:#DEDAD0;--bg4:#CEC9BC;
+  --ink:#080808;--ink2:#1E1E1E;--ink3:#4A4A4A;--ink4:#7A7A7A;
+  --rule:#C0BAA8;--rule2:#A09890;--white:#FDFCF7;
+  --fh:'Arial Black','Arial',sans-serif;
+  --fb:'Georgia','Times New Roman',serif;
+  --fm:'Courier New',monospace;
+  --r:2px;
+  --green-bg:#C8EDAA;--green-txt:#1A4A05;
+  --amber-bg:#FFE490;--amber-txt:#5C3200;
+  --red-bg:#F5B8B8;--red-txt:#7A0000;
+  --blue-bg:#B8D4F8;--blue-txt:#0A2060;
+  --orange-bg:#FFD4A0;--orange-txt:#6B2800;
+  --purple-bg:#E0C8F5;--purple-txt:#3A0060;
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:15px;line-height:1.6;min-height:100vh}
+
+/* ═══════════════════════════ TYPOGRAPHY ═══════════════════════════ */
+h2.section-title,
+button.section-title{
+  font-family:var(--fh);font-size:clamp(1rem,2.4vw,1.35rem);
+  font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--white);background:var(--ink);
+  padding:.85rem 1.25rem;margin:0;
+  display:flex;align-items:center;gap:.6rem;
+  cursor:pointer;user-select:none;
+  width:100%;border:none;text-align:left;
+  transition:background .15s;
+  line-height:1.1;
+}
+h2.section-title:hover,
+button.section-title:hover{background:#2a2a2a}
+h2.section-title .icon,
+button.section-title .icon{font-size:1.1rem;flex-shrink:0}
+h2.section-title .sec-chev,
+button.section-title .sec-chev{
+  margin-left:auto;font-size:1rem;
+  transition:transform .25s;flex-shrink:0;
+  display:inline-block;
+  transform:rotate(0deg);
+}
+h2.section-title.collapsed .sec-chev,
+button.section-title.collapsed .sec-chev{transform:rotate(-90deg)}
+.card-body{transition:none}
+.card-body.collapsed{display:none}
+@media(max-width:700px){
+  h2.section-title,button.section-title{
+    padding:.9rem 1rem;font-size:clamp(.95rem,4vw,1.15rem);min-height:54px
+  }
+  h2.section-title .sec-chev,button.section-title .sec-chev{font-size:1rem}
+}
+h3.sub-title{
+  font-family:var(--fh);font-size:.68rem;font-weight:900;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);
+  padding:.5rem 1.25rem;background:var(--bg3);
+  border-bottom:1px solid var(--rule);
+}
+label.field-lbl{
+  display:block;font-family:var(--fh);font-size:.56rem;font-weight:900;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:.3rem;
+}
+
+/* ═══════════════════════════ LAYOUT ═══════════════════════════ */
+.page-wrap{max-width:960px;margin:0 auto;padding:0 0 4rem}
+@media(max-width:700px){.page-wrap{padding:0 0 3rem}}
+
+/* ─── HEADER ─── */
+.site-header{
+  background:var(--ink);color:var(--bg);
+  padding:1.25rem 1.5rem;
+  border-bottom:5px solid var(--ink);
+  text-align:center;
+}
+.site-header h1{
+  font-family:var(--fh);font-size:clamp(.9rem,2.5vw,1.35rem);
+  font-weight:900;letter-spacing:.07em;text-transform:uppercase;line-height:1.1;
+}
+.site-header p{font-size:.72rem;opacity:.6;margin-top:4px;letter-spacing:.04em}
+.header-meta{
+  display:flex;gap:.75rem;margin-top:.75rem;flex-wrap:wrap;
+}
+.hbadge{
+  font-family:var(--fh);font-size:.55rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+  background:rgba(255,255,255,.12);color:var(--bg);
+  border:1px solid rgba(255,255,255,.25);padding:3px 10px;border-radius:999px;white-space:nowrap;
+}
+
+/* ─── SECTION CARD ─── */
+.card{
+  background:var(--white);border:1.5px solid var(--ink);
+  border-radius:var(--r);overflow:hidden;margin:1.25rem 1.25rem 0;
+}
+@media(max-width:600px){.card{margin:.875rem .75rem 0}}
+.card-body{padding:1.25rem}
+@media(max-width:600px){.card-body{padding:.875rem}}
+
+/* ─── INPUTS ─── */
+.field-group{margin-bottom:.875rem}
+.input-row{display:grid;gap:.75rem;grid-template-columns:1fr 1fr}
+@media(max-width:580px){.input-row{grid-template-columns:1fr}}
+.input-row3{display:grid;gap:.75rem;grid-template-columns:1fr 1fr 1fr}
+@media(max-width:700px){.input-row3{grid-template-columns:1fr 1fr}}
+@media(max-width:440px){.input-row3{grid-template-columns:1fr}}
+
+.select-wrap{position:relative}
+.select-wrap::after{content:"▾";position:absolute;right:.65rem;top:50%;transform:translateY(-50%);pointer-events:none;font-size:.78rem;color:var(--ink3)}
+select,input[type=number]{
+  width:100%;padding:.52rem .65rem;
+  font-family:var(--fb);font-size:.84rem;font-weight:700;
+  background:var(--bg2);border:1.5px solid var(--ink);border-radius:var(--r);
+  color:var(--ink);appearance:none;-webkit-appearance:none;cursor:pointer;
+}
+select:focus,input[type=number]:focus{outline:3px solid var(--ink);outline-offset:1px}
+
+/* ─── SEG CONTROL ─── */
+.seg{display:flex;border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden;margin-bottom:.875rem}
+.seg-btn{
+  flex:1;padding:.48rem;font-family:var(--fh);font-size:.6rem;font-weight:900;
+  letter-spacing:.06em;text-transform:uppercase;
+  background:var(--bg2);border:none;cursor:pointer;color:var(--ink3);transition:background .12s,color .12s;
+}
+.seg-btn.active{background:var(--ink);color:var(--bg)}
+
+/* ─── BUTTONS ─── */
+.btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.6rem 1.25rem;font-family:var(--fh);font-size:.65rem;font-weight:900;
+  letter-spacing:.08em;text-transform:uppercase;border-radius:var(--r);cursor:pointer;
+  transition:background .12s,color .12s,border-color .12s;border:2px solid var(--ink);
+}
+.btn-primary{background:var(--ink);color:var(--bg)}
+.btn-primary:hover{background:var(--bg);color:var(--ink)}
+.btn-secondary{background:var(--bg2);color:var(--ink)}
+.btn-secondary:hover{background:var(--bg4)}
+.btn-danger{background:none;color:var(--red-txt);border-color:var(--red-txt)}
+.btn-danger:hover{background:var(--red-bg)}
+.btn-sm{padding:.38rem .8rem;font-size:.58rem}
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
+
+/* ─── PRODUCT SELECTOR ─── */
+.product-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.75rem}
+@media(max-width:560px){.product-grid{grid-template-columns:1fr}}
+
+.prod-chip{
+  display:flex;align-items:center;gap:.5rem;
+  padding:.45rem .65rem;border:1.5px solid var(--rule2);border-radius:var(--r);
+  background:var(--bg2);cursor:pointer;transition:background .1s,border-color .1s;
+  user-select:none;
+}
+.prod-chip:hover{background:var(--bg3);border-color:var(--ink)}
+.prod-chip.sel{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.prod-chip input{width:13px;height:13px;accent-color:var(--ink);flex-shrink:0;cursor:pointer}
+.prod-chip-name{font-size:.75rem;font-weight:700;flex:1;line-height:1.25;cursor:pointer}
+.prod-chip-npk{font-family:var(--fm);font-size:.55rem;font-weight:700;white-space:nowrap;color:var(--ink3)}
+.prod-chip.sel .prod-chip-npk{color:var(--bg);opacity:.75}
+.prod-chip.sel .prod-chip-name{color:var(--bg)}
+
+/* ─── ACCORDION ─── */
+.acc{border:1.5px solid var(--rule2);border-radius:var(--r);overflow:hidden;margin-bottom:.5rem}
+.acc-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.55rem .875rem;background:var(--bg3);cursor:pointer;
+  font-family:var(--fh);font-size:.62rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink);user-select:none;border:none;width:100%;
+}
+.acc-hd:hover{background:var(--bg4)}
+.acc-hd .chev{font-size:.65rem;transition:transform .2s}
+.acc-hd.open .chev{transform:rotate(90deg)}
+.acc-bd{display:none;padding:.75rem;background:var(--white);border-top:1px solid var(--rule)}
+.acc-bd.open{display:block}
+
+/* ─── STACK TABLE ─── */
+.stack-table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:.75rem}
+.stack-table th{
+  background:var(--bg3);padding:.46rem .7rem;text-align:left;
+  font-family:var(--fh);font-size:.52rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink3);border-bottom:1.5px solid var(--ink);
+}
+.stack-table td{padding:.52rem .7rem;border-bottom:1px solid var(--rule);font-weight:700;vertical-align:middle}
+.stack-table tr:last-child td{border-bottom:none}
+.stack-table tr.sum-row td{background:var(--ink);color:var(--bg);font-family:var(--fh);font-weight:900;font-size:.82rem}
+.stack-table tr.sum-row td:first-child{font-family:var(--fh);letter-spacing:.06em;text-transform:uppercase}
+.stack-table tr:not(.sum-row):hover td{background:var(--bg2)}
+.mono{font-family:var(--fm);font-size:.72rem}
+.bold{font-weight:900}
+.del-btn{background:none;border:none;color:var(--red-txt);cursor:pointer;font-size:.85rem;padding:.1rem .3rem;border-radius:2px}
+.del-btn:hover{background:var(--red-bg)}
+
+/* ─── MIX ORDER ─── */
+.mix-list{list-style:none;counter-reset:mix-counter}
+.mix-item{
+  display:grid;grid-template-columns:52px 1fr auto;
+  border-bottom:1px solid var(--rule);align-items:start;
+}
+.mix-item:last-child{border-bottom:none}
+@media(max-width:560px){.mix-item{grid-template-columns:40px 1fr}}
+.mix-num{
+  display:flex;align-items:center;justify-content:center;align-self:stretch;
+  font-family:var(--fh);font-size:1.1rem;font-weight:900;color:var(--ink4);
+  background:var(--bg3);border-right:1px solid var(--rule);padding:.65rem .5rem;
+}
+.mix-body{padding:.65rem .875rem}
+.mix-name{font-weight:900;font-size:.86rem}
+.mix-npk{font-family:var(--fm);font-size:.58rem;color:var(--ink3);margin-top:1px}
+.mix-note{font-size:.74rem;color:var(--ink2);margin-top:4px;line-height:1.5;font-style:italic}
+.mix-note.crit{
+  font-style:normal;font-weight:700;color:var(--red-txt);
+  background:var(--red-bg);padding:3px 7px;border-radius:2px;
+  display:inline-block;margin-top:5px;
+}
+.mix-dose{padding:.65rem .875rem .65rem 0;text-align:right;min-width:140px}
+@media(max-width:560px){.mix-dose{grid-column:2;padding:0 .875rem .65rem;text-align:left}}
+.mix-dose-primary{font-family:var(--fh);font-size:.92rem;font-weight:900}
+.mix-dose-sub{font-size:.68rem;font-weight:700;color:var(--ink3);margin-top:2px;line-height:1.5}
+
+/* ─── METRIC CARDS ─── */
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:.875rem 0}
+.metric-card{background:var(--bg2);border:1.5px solid var(--ink);border-radius:var(--r);padding:.875rem 1rem}
+.mc-label{font-family:var(--fh);font-size:.52rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px}
+.mc-val{font-family:var(--fh);font-size:1.5rem;font-weight:900;line-height:1}
+.mc-sub{font-size:.68rem;font-weight:700;color:var(--ink3);margin-top:2px}
+
+/* ─── pH ─── */
+.ph-display{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.ph-big{font-family:var(--fh);font-size:2.8rem;font-weight:900;line-height:1}
+.ph-pill{display:inline-block;padding:4px 12px;border-radius:999px;font-family:var(--fh);font-size:.58rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.ph-note{font-size:.74rem;font-weight:700;color:var(--ink2);margin-top:.65rem;padding-top:.65rem;border-top:1px solid var(--rule);line-height:1.6}
+
+/* ─── ALERT BOXES ─── */
+.alert{border-radius:var(--r);padding:.6rem .9rem;font-size:.75rem;font-weight:700;line-height:1.55;border-left:4px solid;margin-bottom:.75rem}
+.alert-red{background:var(--red-bg);border-color:var(--red-txt);color:var(--red-txt)}
+.alert-amber{background:var(--amber-bg);border-color:var(--amber-txt);color:var(--amber-txt)}
+.alert-green{background:var(--green-bg);border-color:var(--green-txt);color:var(--green-txt)}
+.alert-blue{background:var(--blue-bg);border-color:var(--blue-txt);color:var(--blue-txt)}
+
+/* ─── TROUBLESHOOT ─── */
+.symptom-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+@media(max-width:600px){.symptom-grid{grid-template-columns:1fr}}
+.symptom-card{
+  border:1.5px solid var(--rule2);border-radius:var(--r);
+  background:var(--bg2);overflow:hidden;cursor:pointer;
+  transition:border-color .12s;
+}
+.symptom-card:hover{border-color:var(--ink)}
+.symptom-card.active{border-color:var(--ink);border-width:2px}
+.sc-head{
+  padding:.5rem .75rem;font-family:var(--fh);font-size:.62rem;font-weight:900;
+  letter-spacing:.07em;text-transform:uppercase;
+  display:flex;align-items:center;gap:.5rem;
+}
+.sc-body{display:none;padding:.65rem .75rem;border-top:1px solid var(--rule);background:var(--white);font-size:.78rem;line-height:1.65;font-weight:700}
+.sc-body.open{display:block}
+.sc-body ul{margin:.35rem 0 .35rem 1rem}
+.sc-body li{margin-bottom:.2rem}
+.sc-icon{font-size:1rem}
+.rx-box{margin-top:.5rem;background:var(--amber-bg);border-radius:var(--r);padding:.5rem .75rem;font-size:.74rem;color:var(--amber-txt);font-weight:700;line-height:1.55}
+.rx-box.rx-red{background:var(--red-bg);color:var(--red-txt)}
+.rx-box.rx-green{background:var(--green-bg);color:var(--green-txt)}
+.rx-box.rx-blue{background:var(--blue-bg);color:var(--blue-txt)}
+
+/* ─── PROGRAM PRESETS ─── */
+.preset-desc{font-size:.8rem;font-weight:700;color:var(--ink2);line-height:1.6;padding:.75rem 0;border-top:1px solid var(--rule);margin-top:.75rem}
+.preset-stack{margin-top:.5rem}
+
+/* ─── QUICK REF TABLE ─── */
+.qr-table{width:100%;border-collapse:collapse;font-size:.76rem}
+.qr-table th{background:var(--bg3);padding:.44rem .7rem;text-align:left;font-family:var(--fh);font-size:.5rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);border-bottom:1.5px solid var(--ink)}
+.qr-table td{padding:.5rem .7rem;border-bottom:1px solid var(--rule);font-weight:700;vertical-align:middle}
+.qr-table tr:last-child td{border-bottom:none}
+.qr-table tr:hover td{background:var(--bg2)}
+
+/* ─── FOOTER ─── */
+
+
+/* ─── DIVIDER ─── */
+.divider{height:1px;background:var(--rule);margin:.875rem 0}
+
+/* ─── UTIL ─── */
+.text-muted{color:var(--ink3);font-size:.75rem;font-weight:700}
+.tag{display:inline-block;font-family:var(--fm);font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;background:var(--bg3);color:var(--ink3);margin-left:4px}
+.tag.red{background:var(--red-bg);color:var(--red-txt)}
+.tag.amber{background:var(--amber-bg);color:var(--amber-txt)}
+.tag.green{background:var(--green-bg);color:var(--green-txt)}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+<!-- ═══════════════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════════════ -->
+<header class="site-header">
+  <h1>Water Soluble Fertilizer Calculator</h1>
+</header>
+
+<!-- ═══════════════════════════════════════════════════
+  SECTION 1 — GLOBAL SETTINGS
+═══════════════════════════════════════════════════ -->
+<div class="card">
+  <button class="section-title" onclick="toggleSection('sec-settings',this)" aria-expanded="true"><span class="icon">⚙️</span> Global Settings <span class="sec-chev">▼</span></button>
+  <div class="card-body" id="sec-settings">
+    <div class="input-row3">
+      <div class="field-group">
+        <label class="field-lbl">Application method</label>
+        <div class="select-wrap">
+          <select id="g-method" onchange="recompute()">
+            <option value="clf">Continuous Liquid Feed (CLF)</option>
+            <option value="weekly">Once-a-Week Soil Drench</option>
+            <option value="foliar">Foliar Spray</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-lbl">Volume of solution</label>
+        <div class="select-wrap">
+          <select id="g-vol" onchange="recompute()">
+            <option value="0.125">16 oz (0.125 gal)</option>
+            <option value="0.25">32 oz (0.25 gal)</option>
+            <option value="0.5">½ gallon</option>
+            <option value="1" selected>1 gallon</option>
+            <option value="2">2 gallons</option>
+            <option value="5">5 gallons</option>
+            <option value="10">10 gallons</option>
+            <option value="20">20 gallons</option>
+            <option value="25">25 gallons</option>
+            <option value="50">50 gallons</option>
+            <option value="100">100 gallons</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-lbl">Dose strength</label>
+        <div class="select-wrap">
+          <select id="g-str" onchange="recompute()">
+            <option value="0.25">¼ strength — seedling</option>
+            <option value="0.5">½ strength — light</option>
+            <option value="1" selected>Full — label rate</option>
+            <option value="1.5">1.5× — heavy feeder</option>
+            <option value="2">2× — maximum</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-lbl">Water source (starting pH)</label>
+        <div class="select-wrap">
+          <select id="g-water" onchange="recompute()">
+            <option value="m70">City / Municipal — pH 7.0</option>
+            <option value="m75">City / Municipal — pH 7.5</option>
+            <option value="w65">Well water — pH 6.5</option>
+            <option value="w70">Well water — pH 7.0</option>
+            <option value="ro">RO / Distilled / Rainwater — pH 7.0</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-lbl">Display reading as</label>
+        <div class="seg">
+          <button class="seg-btn active" id="seg-ppm" onclick="setDispMode('ppm')">PPM</button>
+          <button class="seg-btn" id="seg-ec" onclick="setDispMode('ec')">EC mS/cm</button>
+        </div>
+      </div>
+    </div>
+    <div id="method-banner" style="margin-top:.25rem"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+  SECTION 2 — PROGRAM PRESETS
+═══════════════════════════════════════════════════ -->
+<div class="card">
+  <button class="section-title" onclick="toggleSection('sec-presets',this)" aria-expanded="true"><span class="icon">📋</span> Program Presets <span class="sec-chev">▼</span></button>
+  <div class="card-body" id="sec-presets">
+    <div class="input-row">
+      <div class="field-group">
+        <label class="field-lbl">Select a feeding program</label>
+        <div class="select-wrap">
+          <select id="preset-sel" onchange="loadPreset()">
+            <option value="">— Choose a preset program —</option>
+            <optgroup label="Growth Programs">
+              <option value="greenup">🌿 Green-Up / Rapid Vegetative Push</option>
+              <option value="rootdev">🌱 Root Development (Transplant / Establishment)</option>
+              <option value="generalveg">🌾 General Vegetative — All-Purpose CLF</option>
+              <option value="heavyveg">💪 Heavy Feeder Vegetative — High N</option>
+            </optgroup>
+            <optgroup label="Bloom & Fruit Programs">
+              <option value="bloomtrigger">🌸 Bloom Enhancement / Trigger</option>
+              <option value="fruitset">🍅 Fruit Set & Development</option>
+              <option value="fruitfinish">🍇 Fruit Finish / Pre-Harvest K-Load</option>
+              <option value="flowercolor">🌺 Flower Color & Bud Count Enhancement</option>
+            </optgroup>
+            <optgroup label="Specialty Crop Programs">
+              <option value="orchid_grow">🌺 Orchid — Vegetative / Growth Phase</option>
+              <option value="orchid_bloom">🌺 Orchid — Bloom / Spike Phase</option>
+              <option value="mum">🌼 Chrysanthemum / Mum Program</option>
+              <option value="acidlover">🫐 Acid-Loving Plants (Blueberry, Azalea, Rhododendron)</option>
+              <option value="hydrangea_blue">💙 Hydrangea Blue Color Enhancement</option>
+              <option value="indoor">🪴 Indoor Foliage / Houseplant CLF</option>
+              <option value="tropicals">🌴 Tropical & Palm Program</option>
+            </optgroup>
+            <optgroup label="Hydroponic & Controlled Environment">
+              <option value="321_veg">💧 3-2-1 Program — Vegetative (Tap Water)</option>
+              <option value="321_bloom">💧 3-2-1 Program — Bloom Transition</option>
+              <option value="321_finish">💧 3-2-1 Program — Finish / K-Load</option>
+              <option value="hydro_lettuce">🥬 Hydroponic Lettuce & Herbs</option>
+              <option value="clone_starter">🌿 Clone / Seedling Starter</option>
+            </optgroup>
+            <optgroup label="Corrective — Macronutrient Deficiencies">
+              <option value="n_deficiency">🟡 Nitrogen Deficiency — Recovery Program</option>
+              <option value="p_deficiency">🟠 Phosphorus Deficiency — Root Zone Correction</option>
+              <option value="k_deficiency">🔥 Potassium Deficiency — K Restoration</option>
+              <option value="ca_deficiency">🦴 Calcium Deficiency — BER &amp; Tip Burn Prevention</option>
+              <option value="mg_correct">✨ Magnesium Deficiency — Epsom Correction</option>
+              <option value="s_deficiency">🌑 Sulfur Deficiency — Young Leaf Chlorosis</option>
+            </optgroup>
+            <optgroup label="Corrective — Micronutrient Deficiencies">
+              <option value="fe_correct">⚡ Iron Chlorosis — Chelated FeED Correction</option>
+              <option value="fe_foliar">🌿 Iron Chlorosis — Emergency Foliar Correction</option>
+              <option value="mn_deficiency">🟤 Manganese Deficiency — pH &amp; Micro Correction</option>
+              <option value="zn_deficiency">🌿 Zinc Deficiency — Micronutrient Program</option>
+              <option value="b_deficiency">🔵 Boron Deficiency — Tip &amp; Stem Disorder</option>
+              <option value="cu_deficiency">🟣 Copper Deficiency — Young Tissue Correction</option>
+              <option value="mo_deficiency">🟣 Molybdenum Deficiency — Low-pH Correction</option>
+            </optgroup>
+            <optgroup label="Corrective — pH &amp; Salt Problems">
+              <option value="acid_correct">🧪 High pH — Acid Correction (Root Drench)</option>
+              <option value="alkaline_raise">⬆️ Low pH — Alkalinity Restoration</option>
+              <option value="salt_flush">🧂 Salt Stress / High EC — Flush &amp; Recovery</option>
+              <option value="bicarbonate">💧 High Bicarbonate Water — Alkalinity Reduction</option>
+            </optgroup>
+            <optgroup label="Corrective — Environmental &amp; Cultural">
+              <option value="rootrot_recovery">🌱 Root Rot Recovery — Post-Pathogen Restart</option>
+              <option value="heat_stress">🌡️ Heat Stress Recovery — Electrolyte Restore</option>
+              <option value="transplant_shock">🌿 Transplant Shock — Establishment Support</option>
+              <option value="overwater_recovery">💧 Overwatering Recovery — Root Zone Restore</option>
+              <option value="frost_recovery">❄️ Frost / Cold Damage Recovery</option>
+              <option value="drought_recovery">☀️ Drought / Underwatering Recovery</option>
+              <option value="ber_prevention">🍅 Blossom End Rot Prevention — Ca Program</option>
+              <option value="tip_burn">🥬 Tip Burn — Lettuce &amp; Indoor Crop Correction</option>
+              <option value="interveinal_all">🔬 Interveinal Chlorosis — Broad Spectrum Program</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+      <div>
+        <div id="preset-desc" class="preset-desc" style="display:none"></div>
+      </div>
+    </div>
+    <div id="preset-result" class="preset-stack"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+  SECTION 3 — NUTRIENT STACK BUILDER
+═══════════════════════════════════════════════════ -->
+<div class="card">
+  <button class="section-title" onclick="toggleSection('sec-stack',this)" aria-expanded="true"><span class="icon">🧪</span> Nutrient Stack Builder <span class="sec-chev">▼</span></button>
+  <div class="card-body" id="sec-stack">
+    <div class="input-row">
+      <div class="field-group">
+        <label class="field-lbl">Add product to stack</label>
+        <div class="select-wrap">
+          <select id="prod-picker">
+            <option value="">— Select a product —</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group" style="display:flex;align-items:flex-end;gap:.5rem">
+        <button class="btn btn-primary" onclick="addToStack()">+ Add to Stack</button>
+        <button class="btn btn-secondary btn-sm" onclick="clearStack()">Clear Stack</button>
+      </div>
+    </div>
+
+    <div id="stack-empty" class="text-muted" style="padding:.75rem 0">No products in stack. Select a product above and click Add, or load a Preset Program.</div>
+    <div id="stack-area" style="display:none">
+      <table class="stack-table" id="stack-table">
+        <thead>
+          <tr>
+            <th>Product</th><th>Line</th><th>NPK</th>
+            <th style="min-width:90px">Parts Ratio</th>
+            <th>Grams</th><th>Measure</th><th>Dry oz</th>
+            <th id="ppm-ec-hd">PPM</th>
+            <th>Blended N%</th><th>Blended P%</th><th>Blended K%</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="stack-body"></tbody>
+        <tfoot id="stack-foot"></tfoot>
+      </table>
+
+      <div class="metric-grid" id="metrics-area"></div>
+
+      <div id="alerts-area"></div>
+
+      <!-- pH block -->
+      <div style="border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden;margin-top:.75rem">
+        <h3 class="sub-title">Estimated Final pH</h3>
+        <div style="padding:.875rem 1.25rem">
+          <div class="ph-display">
+            <span class="ph-big" id="ph-val">—</span>
+            <span id="ph-from" style="font-size:.74rem;font-weight:700;color:var(--ink3)"></span>
+            <span class="ph-pill" id="ph-pill"></span>
+          </div>
+          <div class="ph-note" id="ph-note"></div>
+        </div>
+      </div>
+
+      <!-- Mixing Order -->
+      <div style="border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden;margin-top:.875rem">
+        <h3 class="sub-title">Mixing Order — Follow Steps In Sequence</h3>
+        <ul class="mix-list" id="mix-list"></ul>
+      </div>
+
+      <!-- Quick-ref per product (only when 1 selected) -->
+      <div id="qr-area"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+  SECTION 4 — TROUBLESHOOTING
+═══════════════════════════════════════════════════ -->
+<div class="card">
+  <button class="section-title" onclick="toggleSection('sec-trouble',this)" aria-expanded="false"><span class="icon">🔬</span> Troubleshooting — Nutrient Problems &amp; Plant Disorders <span class="sec-chev">▼</span></button>
+  <div class="card-body collapsed" id="sec-trouble">
+    <p class="text-muted" style="margin-bottom:.875rem">Click any disorder to expand diagnosis and corrective action. Always confirm with a tissue test or pour-through substrate test before making major program changes.</p>
+
+    <!-- macro deficiencies -->
+    <div style="margin-bottom:.5rem;font-family:var(--fh);font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)">Macronutrient Deficiencies</div>
+    <div class="symptom-grid" id="sympt-grid-macro"></div>
+
+    <div style="margin:.875rem 0 .5rem;font-family:var(--fh);font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)">Micronutrient Deficiencies</div>
+    <div class="symptom-grid" id="sympt-grid-micro"></div>
+
+    <div style="margin:.875rem 0 .5rem;font-family:var(--fh);font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)">Toxicities & Environmental Disorders</div>
+    <div class="symptom-grid" id="sympt-grid-tox"></div>
+
+    <div style="margin:.875rem 0 .5rem;font-family:var(--fh);font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)">pH-Induced Problems</div>
+    <div class="symptom-grid" id="sympt-grid-ph"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+  SECTION 5 — QUICK REFERENCE
+═══════════════════════════════════════════════════ -->
+<div class="card">
+  <button class="section-title" onclick="toggleSection('sec-ref',this)" aria-expanded="false"><span class="icon">📐</span> Measure Conversion Reference <span class="sec-chev">▼</span></button>
+  <div class="card-body collapsed" id="sec-ref">
+    <table class="qr-table">
+      <thead><tr><th>Measure</th><th>Grams (approx)</th><th>Dry oz</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="bold">⅛ tsp</td><td class="mono">0.74g</td><td class="mono">0.026 oz</td><td class="text-muted">Seedling / ultra-light CLF</td></tr>
+        <tr><td class="bold">¼ tsp</td><td class="mono">1.48g</td><td class="mono">0.052 oz</td><td class="text-muted">Indoor light CLF constant-feed</td></tr>
+        <tr><td class="bold">½ tsp</td><td class="mono">2.95g</td><td class="mono">0.104 oz</td><td class="text-muted">Indoor standard CLF / light foliar</td></tr>
+        <tr><td class="bold">¾ tsp</td><td class="mono">4.43g</td><td class="mono">0.156 oz</td><td class="text-muted">Standard CLF / light outdoor</td></tr>
+        <tr><td class="bold">1 tsp</td><td class="mono">5.90g</td><td class="mono">0.208 oz</td><td class="text-muted">Outdoor standard / hydro full-rate</td></tr>
+        <tr><td class="bold">1½ tsp</td><td class="mono">8.85g</td><td class="mono">0.312 oz</td><td class="text-muted">Heavy feeder CLF</td></tr>
+        <tr><td class="bold">1 tbsp (3 tsp)</td><td class="mono">17.7g</td><td class="mono">0.625 oz</td><td class="text-muted">Full outdoor / once-weekly drench</td></tr>
+        <tr><td class="bold">2 tbsp</td><td class="mono">35.4g</td><td class="mono">1.25 oz</td><td class="text-muted">Heavy weekly drench</td></tr>
+        <tr><td class="bold">1 dry oz</td><td class="mono">28.35g</td><td class="mono">1.00 oz</td><td class="text-muted">Pro batch reference</td></tr>
+        <tr><td class="bold">4 dry oz</td><td class="mono">113.4g</td><td class="mono">4.00 oz</td><td class="text-muted">5-gallon batch reference</td></tr>
+        <tr><td class="bold">8 dry oz (½ lb)</td><td class="mono">226.8g</td><td class="mono">8.00 oz</td><td class="text-muted">25–30 gal batch reference</td></tr>
+        <tr><td class="bold">1 lb</td><td class="mono">453.6g</td><td class="mono">16.0 oz</td><td class="text-muted">~50–75 gal CLF batch</td></tr>
+        <tr><td class="bold">~13 oz (label rate)</td><td class="mono">369g</td><td class="mono">13.0 oz</td><td class="text-muted">Standard 100-gal CLF batch</td></tr>
+      </tbody>
+    </table>
+    <div class="divider"></div>
+    <div class="input-row">
+      <div>
+        <div style="font-family:var(--fh);font-size:.6rem;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:.4rem">EC ↔ PPM Conversion (700 factor)</div>
+        <table class="qr-table">
+          <thead><tr><th>EC (mS/cm)</th><th>PPM (700×)</th><th>Typical crop range</th></tr></thead>
+          <tbody>
+            <tr><td>0.4–0.8</td><td>280–560</td><td class="text-muted">Seedlings, clones, sensitive crops</td></tr>
+            <tr><td>0.8–1.2</td><td>560–840</td><td class="text-muted">Lettuce, herbs, microgreens</td></tr>
+            <tr><td>1.2–1.8</td><td>840–1260</td><td class="text-muted">Tomato seedlings, peppers, flowering annuals</td></tr>
+            <tr><td>1.8–2.4</td><td>1260–1680</td><td class="text-muted">Tomato / pepper fruiting, heavy vegetative crops</td></tr>
+            <tr><td>2.4–3.0</td><td>1680–2100</td><td class="text-muted">Heavy feeders, fruiting crops in bloom, commercial greenhouse</td></tr>
+            <tr><td>3.0+</td><td>2100+</td><td class="text-muted">Max dose — monitor closely for salt stress</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div style="font-family:var(--fh);font-size:.6rem;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:.4rem">Target pH by crop / medium</div>
+        <table class="qr-table">
+          <thead><tr><th>pH Range</th><th>Crop / Situation</th></tr></thead>
+          <tbody>
+            <tr><td>4.5–5.5</td><td class="text-muted">Acid-loving: blueberry, azalea, camellia</td></tr>
+            <tr><td>5.5–6.2</td><td class="text-muted">Hydroponic (NFT, DWC, rockwool, coco)</td></tr>
+            <tr><td>6.0–6.5</td><td class="text-muted">Soilless / peat-lite, container greenhouse</td></tr>
+            <tr><td>6.0–7.0</td><td class="text-muted">Field soil, in-ground, outdoor containers</td></tr>
+            <tr><td>6.0–6.5</td><td class="text-muted">Indoor houseplants, orchids</td></tr>
+            <tr><td>5.8–6.5</td><td class="text-muted">Fruiting crops, high-demand specialty crops (all media)</td></tr>
+            <tr><td>6.5–7.5</td><td class="text-muted">High-alkalinity calcareous soils (adjust down)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+  SECTION 6 — CUSTOM NPK CALCULATOR
+═══════════════════════════════════════════════════ -->
+<div class="card">
+  <button class="section-title" onclick="toggleSection('sec-custom',this)" aria-expanded="true"><span class="icon">🔢</span> Custom NPK Calculator <span class="sec-chev">▼</span></button>
+  <div class="card-body" id="sec-custom">
+    <p class="text-muted" style="margin-bottom:1rem">Enter any NPK formula, application rate, and volume to calculate total PPM across all volumes from 1 oz to 100 gallons.</p>
+
+    <div class="input-row3">
+      <div class="field-group">
+        <label class="field-lbl">Nitrogen (N %)</label>
+        <input type="number" id="cust-n" min="0" max="60" step="0.1" placeholder="e.g. 20" oninput="calcCustom()">
+      </div>
+      <div class="field-group">
+        <label class="field-lbl">Phosphorus (P₂O₅ %)</label>
+        <input type="number" id="cust-p" min="0" max="60" step="0.1" placeholder="e.g. 5" oninput="calcCustom()">
+      </div>
+      <div class="field-group">
+        <label class="field-lbl">Potassium (K₂O %)</label>
+        <input type="number" id="cust-k" min="0" max="60" step="0.1" placeholder="e.g. 20" oninput="calcCustom()">
+      </div>
+      <div class="field-group">
+        <label class="field-lbl">Application rate unit</label>
+        <div class="select-wrap">
+          <select id="cust-rate-unit" onchange="custRateUnitChange()">
+            <option value="gpg">Grams per gallon</option>
+            <option value="tsp_eighth">⅛ teaspoon</option>
+            <option value="tsp_quarter">¼ teaspoon</option>
+            <option value="tsp_half">½ teaspoon</option>
+            <option value="tsp_3q">¾ teaspoon</option>
+            <option value="tsp_1">1 teaspoon</option>
+            <option value="tsp_1h">1½ teaspoons</option>
+            <option value="tsp_2">2 teaspoons</option>
+            <option value="tbsp_1">1 tablespoon</option>
+            <option value="tbsp_2">2 tablespoons</option>
+            <option value="oz_1">1 dry oz</option>
+            <option value="oz_2">2 dry oz</option>
+            <option value="oz_4">4 dry oz</option>
+            <option value="oz_8">8 dry oz (½ lb)</option>
+            <option value="oz_16">16 dry oz (1 lb)</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-lbl" id="cust-rate-lbl">Rate value (grams per gallon)</label>
+        <input type="number" id="cust-gpg" min="0.01" max="500" step="0.01" value="3.8" oninput="calcCustom()">
+      </div>
+      <div class="field-group">
+        <label class="field-lbl">PPM conversion factor</label>
+        <div class="select-wrap">
+          <select id="cust-factor" onchange="calcCustom()">
+            <option value="700">700 (standard / Hanna)</option>
+            <option value="500">500 (Truncheon / Bluelab)</option>
+            <option value="640">640 (EC × 640)</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-lbl">Formula label (optional)</label>
+        <input type="text" id="cust-label" placeholder="e.g. My Custom 20-5-20" oninput="calcCustom()" style="font-family:var(--fb);font-size:.84rem;font-weight:700;width:100%;padding:.52rem .65rem;background:var(--bg2);border:1.5px solid var(--ink);border-radius:var(--r);color:var(--ink)">
+      </div>
+    </div>
+
+    <!-- Summary metrics -->
+    <div id="cust-metrics" style="display:none">
+      <div class="metric-grid" id="cust-metric-cards"></div>
+
+      <!-- Full volume table -->
+      <div style="border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden;margin-top:.875rem">
+        <h3 class="sub-title">PPM &amp; EC — All Volumes</h3>
+        <div style="overflow-x:auto">
+          <table class="stack-table" id="cust-vol-table">
+            <thead>
+              <tr>
+                <th>Volume</th>
+                <th>Grams</th>
+                <th>Measure</th>
+                <th>Dry oz</th>
+                <th>Dry lb</th>
+                <th>Total PPM</th>
+                <th>N ppm</th>
+                <th>P ppm</th>
+                <th>K ppm</th>
+                <th>EC mS/cm</th>
+              </tr>
+            </thead>
+            <tbody id="cust-vol-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Spoon rate reference -->
+      <div style="border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden;margin-top:.875rem">
+        <h3 class="sub-title">PPM by Measure — Per Gallon</h3>
+        <div style="overflow-x:auto">
+          <table class="stack-table" id="cust-spoon-table">
+            <thead>
+              <tr>
+                <th>Measure</th>
+                <th>Grams</th>
+                <th>Total PPM / gal</th>
+                <th>N ppm</th>
+                <th>P ppm</th>
+                <th>K ppm</th>
+                <th>EC mS/cm</th>
+                <th>Typical use</th>
+              </tr>
+            </thead>
+            <tbody id="cust-spoon-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="cust-empty" class="text-muted" style="padding:.75rem 0">Enter N, P, and K percentages above to generate the full calculation table.</div>
+  </div>
+</div>
+
+</div><!-- end page-wrap -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════ -->
+<script>
+/* ─── GLOBAL STATE ─── */
+var DISP = 'ppm';
+var STACK = []; // array of {product, qty}
+
+/* ─── CONSTANTS ─── */
+var WPH = {m70:7.0, m75:7.5, w65:6.5, w70:7.0, ro:7.0};
+var METH = {
+  clf:   {label:'Continuous Liquid Feed (CLF)', mult:1.0,   icon:'💧', tip:'Feed at the base dose every watering. Maintains steady EC/PPM. Ideal for hydro, coco, soilless, and containers.'},
+  weekly:{label:'Once-a-Week Soil Drench',      mult:2.5,   icon:'🪣', tip:'2.5× CLF dose applied weekly to root zone. Water to runoff. Flush monthly with clean water.'},
+  foliar:{label:'Foliar Spray',                 mult:0.4,   icon:'🌿', tip:'40% of CLF dose applied to leaf surfaces. Early morning or evening only. Not suitable for all products.'}
+};
+
+/* ══════════════════════════════════════════════════════
+   COMPLETE PRODUCT DATABASE
+══════════════════════════════════════════════════════ */
+var PRODUCTS = [
+  /* ── Jack's Classic ── */
+  {id:'c01',line:'Classic', name:'All Purpose 20-20-20',          npk:'20-20-20', N:20,P:20,K:20, gpg:3.80, pf:50,
+   phD:{m70:-.45,m75:-.65,w65:-.30,w70:-.45,ro:-.35}, foliarOK:true,
+   mix:'Dissolve in warm water until fully clear. Foliar or root drench.',
+   notes:'Industry standard. 1 tsp ≈ 250 ppm/gal. All plants, all stages.'},
+  {id:'c02',line:'Classic', name:'Blossom Booster 10-30-20',      npk:'10-30-20', N:10,P:30,K:20, gpg:3.80, pf:38,
+   phD:{m70:-.40,m75:-.55,w65:-.28,w70:-.40,ro:-.30}, foliarOK:true,
+   mix:'High-P — dissolve in warm water. Do not premix concentrated with Cal Nit.',
+   notes:'High-phosphorus bloom trigger. Increases flower count and color.'},
+  {id:'c03',line:'Classic', name:'Orchid Special 30-10-10',       npk:'30-10-10', N:30,P:10,K:10, gpg:3.80, pf:55,
+   phD:{m70:-.50,m75:-.70,w65:-.35,w70:-.50,ro:-.40}, foliarOK:false,
+   mix:'Lukewarm water. High-N compensates for leaching in open bark/rock media. ¼ tsp/gal every watering.',
+   notes:'Orchids in bark/fir/rock media. Overcomes rapid leaching.'},
+  {id:'c04',line:'Classic', name:'Orchid Liquid 7-5-6',           npk:'7-5-6',   N:7, P:5, K:6,  gpg:3.80, pf:26,
+   phD:{m70:-.35,m75:-.50,w65:-.22,w70:-.35,ro:-.28}, foliarOK:true, liquid:true,
+   mix:'Liquid concentrate — ¾ tsp (½ capful) per gallon every watering.',
+   notes:'General orchid health. Switch to 3-9-6 when spikes appear.'},
+  {id:'c05',line:'Classic', name:'Orchid Bloom Booster 3-9-6',    npk:'3-9-6',   N:3, P:9, K:6,  gpg:3.80, pf:18,
+   phD:{m70:-.30,m75:-.45,w65:-.20,w70:-.30,ro:-.25}, foliarOK:true, liquid:true,
+   mix:'Liquid concentrate — ¾ tsp/gal when flower spikes visible.',
+   notes:'Lower N + higher K for bud set and re-blooming. Contains Ca + Mg.'},
+  {id:'c06',line:'Classic', name:'Houseplant Special 15-30-15',   npk:'15-30-15', N:15,P:30,K:15, gpg:1.20, pf:43,
+   phD:{m70:-.42,m75:-.58,w65:-.28,w70:-.42,ro:-.32}, foliarOK:true,
+   mix:'Indoor CLF: ¼ tsp/gal. Outdoor: 1 tbsp/gal.',
+   notes:'Philodendron, pothos, ficus, dracaenas, aglaonema. All indoor foliage.'},
+  {id:'c07',line:'Classic', name:'Acid Special 17-6-6',           npk:'17-6-6',  N:17,P:6, K:6,  gpg:3.80, pf:52,
+   phD:{m70:-.70,m75:-.95,w65:-.55,w70:-.70,ro:-.60}, foliarOK:false,
+   mix:'ROOT DRENCH ONLY. Effective near concrete (elevated pH zones). Elevated S and Fe.',
+   notes:'Lowers soil pH for azaleas, blueberries, rhododendrons, hydrangeas. Elevated Fe + S.'},
+  {id:'c08',line:'Classic', name:'Hydrangea Blue 7-3-3',          npk:'7-3-3',   N:7, P:3, K:3,  gpg:3.80, pf:26,
+   phD:{m70:-.80,m75:-1.05,w65:-.65,w70:-.80,ro:-.70}, foliarOK:false,
+   mix:'ROOT DRENCH ONLY — contains aluminum sulfate. Mix separately from other nutrients.',
+   notes:'Lowers pH and delivers Al to maintain/enhance blue pigment. Will NOT change white varieties.'},
+  {id:'c09',line:'Classic', name:'Veggie FeED 12-15-30',          npk:'12-15-30', N:12,P:15,K:30, gpg:3.80, pf:40,
+   phD:{m70:-.42,m75:-.58,w65:-.28,w70:-.42,ro:-.32}, foliarOK:true,
+   mix:'Contains Ca to prevent blossom end rot. Dissolve in warm water.',
+   notes:'Tomatoes, peppers, cucumbers, squash. Added Ca prevents BER.'},
+  {id:'c10',line:'Classic', name:'Mum FeED 22-5-16',              npk:'22-5-16', N:22,P:5, K:16, gpg:3.80, pf:55,
+   phD:{m70:-.50,m75:-.68,w65:-.35,w70:-.50,ro:-.40}, foliarOK:false,
+   mix:'Exclusive FeED iron chelate stays available even as pH rises. Warm water.',
+   notes:'Garden mums. Extra Mg, S, Fe. Chelated iron for pH-stable availability.'},
+  {id:'c11',line:'Classic', name:'Petunia FeED 20-6-22',          npk:'20-6-22', N:20,P:6, K:22, gpg:3.80, pf:50,
+   phD:{m70:-.45,m75:-.62,w65:-.30,w70:-.45,ro:-.35}, foliarOK:true,
+   mix:'Chelated iron formula. Foliar spray for rapid Fe deficiency correction.',
+   notes:'Iron-hungry plants: petunias, calibrachoa, begonias. Chelated Fe stays available.'},
+  {id:'c12',line:'Classic', name:'African Violet 12-36-14',       npk:'12-36-14', N:12,P:36,K:14, gpg:3.80, pf:38,
+   phD:{m70:-.40,m75:-.55,w65:-.28,w70:-.40,ro:-.30}, foliarOK:false,
+   mix:'Room-temp water. Do not wet African violet leaf surfaces.',
+   notes:'High-P for all flowering houseplants. Deep green foliage, prolific blooms.'},
+  {id:'c15',line:'Classic', name:'Ultra Violet 5-50-17',           npk:'5-50-17',  N:5, P:50,K:17, gpg:3.80, pf:30,
+   phD:{m70:-.38,m75:-.52,w65:-.26,w70:-.38,ro:-.28}, foliarOK:false,
+   mix:'Extremely high P — dissolve fully in warm water before adding to reservoir. Do not premix concentrated with calcium-containing formulas.',
+   notes:"Jack's Ultra Violet 5-50-17. Extreme high-P bloom trigger for African violets, orchids, and all flowering houseplants. Use at bloom onset for 1–2 weeks to maximize bud set and blossom count. Return to balanced formula after. Low N prevents vegetative push during bloom. High K supports stem strength and flower quality.",
+   wklyNote:'¼–½ tsp/gal as weekly soil drench during active bloom phase only.'},
+  {id:'c13',line:'Classic', name:'Citrus Food 20-10-20',          npk:'20-10-20', N:20,P:10,K:20, gpg:3.80, pf:50,
+   phD:{m70:-.45,m75:-.65,w65:-.30,w70:-.45,ro:-.35}, foliarOK:true,
+   mix:'Root drench or foliar for tropical fruiting plants.',
+   notes:'Citrus, mango, kumquat, lemon/lime. Promotes vibrant leaves and fruit.'},
+  {id:'c14',line:'Classic', name:'Tropical Food 16-5-25',         npk:'16-5-25', N:16,P:5, K:25, gpg:3.80, pf:48,
+   phD:{m70:-.45,m75:-.62,w65:-.30,w70:-.45,ro:-.35}, foliarOK:true,
+   mix:'Extra K, Mg, S prevent salt accumulation. Dissolve fully.',
+   notes:'Palms, tropicals. Formerly "Palm Food." Prevents harmful salt buildup.'},
+
+  /* ── Jack's Nutrients ── */
+  {id:'n01',line:'Nutrients', name:'5-12-26 Part A',              npk:'5-12-26',  N:5, P:12,K:26, gpg:3.60, pf:36,
+   phD:{m70:-.40,m75:-.55,w65:-.28,w70:-.40,ro:-.28}, foliarOK:false, partA:true,
+   mix:'⚠ CRITICAL — Dissolve Part A SEPARATELY in warm water first. NEVER premix with Cal Nit (Part B) at high concentration.',
+   notes:'Foundation of the 3-2-1 program. Pair with 15-0-0 Cal Nit + Epsom. 3.6 g/gal CLF.'},
+  {id:'n02',line:'Nutrients', name:'15-0-0 Cal Nit (Part B)',     npk:'15-0-0',   N:15,P:0, K:0,  gpg:2.60, pf:26,
+   phD:{m70:-.20,m75:-.28,w65:-.14,w70:-.20,ro:-.15}, foliarOK:false, partB:true,
+   mix:'⚠ CRITICAL — Dissolve Part B SEPARATELY. Add to reservoir ONLY after Part A is fully diluted. Never combine Part A + Part B concentrated.',
+   notes:'Calcium nitrate. Provides Ca + fast-acting N. Essential Part B. 2.6 g/gal CLF.'},
+  {id:'n03',line:'Nutrients', name:'0-12-26 Part A (Zero-N)',     npk:'0-12-26',  N:0, P:12,K:26, gpg:4.00, pf:0,
+   phD:{m70:-.35,m75:-.48,w65:-.24,w70:-.35,ro:-.25}, foliarOK:false, partA:true,
+   mix:'Zero-N Part A. Dissolve separately. Pair with 15-0-0 Cal Nit.',
+   notes:'No-nitrogen Part A for precise N-control. Pair with Cal Nit.'},
+  {id:'n04',line:'Nutrients', name:'6-6-26 Low Phos Part A',      npk:'6-6-26',   N:6, P:6, K:26, gpg:4.00, pf:32,
+   phD:{m70:-.38,m75:-.52,w65:-.26,w70:-.38,ro:-.28}, foliarOK:false, partA:true,
+   mix:'Low-P Part A. Dissolve separately before adding to main reservoir.',
+   notes:'Low-phosphorus Part A for P-restricted or light-dep programs.'},
+  {id:'n05',line:'Nutrients', name:'12-4-16 Tap Water FeED',      npk:'12-4-16',  N:12,P:4, K:16, gpg:3.50, pf:47,
+   phD:{m70:-.55,m75:-.75,w65:-.40,w70:-.55,ro:-.45}, foliarOK:false,
+   mix:'Single-bag for tap/municipal water. Dissolve and stir. Naturally lowers pH.',
+   notes:'13.5 oz/100 gal = ~150 ppm N. Hard tap water — no Ca supplement needed.'},
+  {id:'n06',line:'Nutrients', name:'15-5-20 Tap Water FeED',      npk:'15-5-20',  N:15,P:5, K:20, gpg:3.50, pf:50,
+   phD:{m70:-.45,m75:-.62,w65:-.32,w70:-.45,ro:-.35}, foliarOK:false,
+   mix:'For tap/moderately soft water. Contains Ca + Mg.',
+   notes:'13.5 oz/100 gal = ~150 ppm N. Good for tap or moderately soft water.'},
+  {id:'n07',line:'Nutrients', name:'15-5-20 RO/Distilled FeED',   npk:'15-5-20',  N:15,P:5, K:20, gpg:3.50, pf:50,
+   phD:{m70:-.40,m75:-.55,w65:-.28,w70:-.40,ro:-.30}, foliarOK:false,
+   mix:'Optimized for RO, distilled, rainwater. Contains 7% Ca and 2% Mg.',
+   notes:'Critical for pure-water growers. Replaces Ca + Mg stripped by RO.'},
+  {id:'n08',line:'Nutrients', name:'18-8-23 Outdoor FeED',        npk:'18-8-23',  N:18,P:8, K:23, gpg:3.50, pf:56,
+   phD:{m70:-.50,m75:-.68,w65:-.35,w70:-.50,ro:-.40}, foliarOK:false,
+   mix:'Outdoor formula. Dissolve in water. Soil provides natural buffering.',
+   notes:'Balanced outdoor formula. Field soil, large containers, in-ground beds.'},
+  {id:'n09',line:'Nutrients', name:'16-4-17 Hydroponic FeED',     npk:'16-4-17',  N:16,P:4, K:17, gpg:3.50, pf:50,
+   phD:{m70:-.55,m75:-.72,w65:-.40,w70:-.55,ro:-.42}, foliarOK:false,
+   mix:'Dissolve fully. Confirm EC and pH before adding to recirculating reservoir.',
+   notes:'Lettuce, herbs, specialty greens. NFT, DWC, aeroponic. 14 oz/100 gal.'},
+  {id:'n10',line:'Nutrients', name:'15-6-17 Clone FeED',          npk:'15-6-17',  N:15,P:6, K:17, gpg:2.50, pf:38,
+   phD:{m70:-.45,m75:-.60,w65:-.32,w70:-.45,ro:-.35}, foliarOK:false,
+   mix:'Low dose for cuttings. Root drench or bottom-feed from clone tray.',
+   notes:'Clone and seedling formula. Encourages root development. 11.1 oz/100 gal.'},
+  {id:'n11',line:'Nutrients', name:'10-30-20 Bloom Booster',      npk:'10-30-20', N:10,P:30,K:20, gpg:3.50, pf:38,
+   phD:{m70:-.42,m75:-.58,w65:-.30,w70:-.42,ro:-.32}, foliarOK:false,
+   mix:'⚠ No calcium. Use 1–2 weeks only. Return to Ca-containing base program after.',
+   notes:'High-P bloom trigger. NO Ca — return to base (3-2-1, 12-4-16) after 1–2 weeks.'},
+  {id:'n12',line:'Nutrients', name:'7-15-30 Finish',              npk:'7-15-30',  N:7, P:15,K:30, gpg:4.00, pf:35,
+   phD:{m70:-.50,m75:-.68,w65:-.38,w70:-.50,ro:-.40}, foliarOK:false,
+   mix:'Last 1–2 weeks before harvest. High K for density. Follow with clean-water flush.',
+   notes:'Pre-harvest K-load for flower/bud density. 19 oz/100 gal = ~100 ppm N.'},
+
+  /* ── Jack's Professional ── */
+  {id:'p01',line:'Professional', name:'Pro 20-10-20 Peat-Lite',   npk:'20-10-20', N:20,P:10,K:20, gpg:3.80, pf:50,
+   phD:{m70:-.45,m75:-.65,w65:-.30,w70:-.45,ro:-.35}, foliarOK:true,
+   mix:'Classic peat-lite greenhouse formula. Dissolve in warm water.',
+   notes:'Most popular professional formula. 2:1:2 ratio, peat-lite micro package.'},
+  {id:'p02',line:'Professional', name:'Pro 25-5-15 High Performance',npk:'25-5-15',N:25,P:5,K:15, gpg:3.80, pf:60,
+   phD:{m70:-.55,m75:-.75,w65:-.40,w70:-.55,ro:-.45}, foliarOK:true,
+   mix:'CLF formula for heavy feeders at moderate to warm temperatures.',
+   notes:'Commercial greenhouse heavy-feeder standard. 5% more efficient than 20-10-20.'},
+  {id:'p03',line:'Professional', name:'Pro 21-7-7 Acid',          npk:'21-7-7',  N:21,P:7, K:7,  gpg:3.80, pf:55,
+   phD:{m70:-.75,m75:-1.00,w65:-.60,w70:-.75,ro:-.65}, foliarOK:false,
+   mix:'High-acid rapid pH correction. Root drench only.',
+   notes:'Professional acid formula. Rapid correction of high-pH conditions. Acid-loving plants.'},
+  {id:'p04',line:'Professional', name:'Pro 22-5-16 Mum FeED',     npk:'22-5-16', N:22,P:5, K:16, gpg:3.80, pf:55,
+   phD:{m70:-.50,m75:-.68,w65:-.35,w70:-.50,ro:-.40}, foliarOK:false,
+   mix:'FeED chelate system keeps Fe available even as pH rises. Warm water.',
+   notes:'Professional Mum FeED. Extra Mg, S, Fe. Heavy-feeding mum crop standard.'},
+  {id:'p05',line:'Professional', name:'Pro 21-8-18 MagMum',       npk:'21-8-18', N:21,P:8, K:18, gpg:3.80, pf:52,
+   phD:{m70:-.50,m75:-.68,w65:-.35,w70:-.50,ro:-.40}, foliarOK:false,
+   mix:'High-Mg mum formula. Dissolve in warm water.',
+   notes:'High-Mg, high-nitrate formula. Improved greening for high-calcium mum programs.'},
+  {id:'p06',line:'Professional', name:'Pro 15-5-15 Ca-Mg LX',     npk:'15-5-15', N:15,P:5, K:15, gpg:3.80, pf:48,
+   phD:{m70:-.48,m75:-.65,w65:-.33,w70:-.48,ro:-.38}, foliarOK:false,
+   mix:'Ca+Mg LX formula. Good for coco coir, peat, rockwool.',
+   notes:'All-in-one Ca + Mg. Short, stocky growth. Tank-mixable with 21-5-20 LX.'},
+  {id:'p07',line:'Professional', name:'Pro 21-5-20 All Purpose LX',npk:'21-5-20', N:21,P:5,K:20,  gpg:3.80, pf:53,
+   phD:{m70:-.50,m75:-.68,w65:-.35,w70:-.50,ro:-.40}, foliarOK:true,
+   mix:'Ideal for moderate to high alkalinity water. Tank-mixable with 15-5-15 LX.',
+   notes:'LX formula for alkaline water. Keeps Mg and P soluble in concentration.'},
+  {id:'p08',line:'Professional', name:'Pro 15-0-15 Dark Weather',  npk:'15-0-15', N:15,P:0, K:15, gpg:3.80, pf:46,
+   phD:{m70:-.42,m75:-.58,w65:-.28,w70:-.42,ro:-.32}, foliarOK:false,
+   mix:'No-P high-nitrate + calcium. Alternate or finisher formula. Warm water.',
+   notes:'No-phosphorus, high Ca. Alternate with 20-10-20 or use as finisher for poinsettias.'},
+  {id:'p09',line:'Professional', name:'Pro 9-45-15 Plant Starter', npk:'9-45-15', N:9, P:45,K:15, gpg:3.80, pf:32,
+   phD:{m70:-.35,m75:-.48,w65:-.24,w70:-.35,ro:-.28}, foliarOK:false,
+   mix:'Very high P — warm water essential. Use at transplant only for root establishment.',
+   notes:'High-P root starter. Use once at transplant. Rapid root development.'},
+  {id:'p10',line:'Professional', name:'Pro 27-15-12 Foliar Feed',  npk:'27-15-12', N:27,P:15,K:12, gpg:3.80, pf:60,
+   phD:{m70:-.48,m75:-.66,w65:-.33,w70:-.48,ro:-.38}, foliarOK:true,
+   mix:'Formulated specifically for foliar. Apply lights-off or early morning. ½ tsp/gal.',
+   notes:'Commercial foliar green-up standard. High urea N for fast leaf absorption.'},
+  {id:'p11',line:'Professional', name:'Pro 25-9-17 Berry Special', npk:'25-9-17', N:25,P:9, K:17, gpg:3.80, pf:58,
+   phD:{m70:-.55,m75:-.75,w65:-.40,w70:-.55,ro:-.45}, foliarOK:true,
+   mix:'Acidic formula for berry crops. Highly soluble. Dissolve in warm water.',
+   notes:'Blueberry and berry crops. Elevated Mg + trace elements for bloom and fruit set.'},
+  {id:'p12',line:'Professional', name:'Pro 24-8-16 Tropical Foliage',npk:'24-8-16',N:24,P:8,K:16, gpg:3.80, pf:58,
+   phD:{m70:-.52,m75:-.70,w65:-.37,w70:-.52,ro:-.42}, foliarOK:true,
+   mix:'Dissolve in warm water for lush interiorscape growth.',
+   notes:'Commercial interiorscape standard. Large tropicals, specimen plants.'},
+  {id:'p13',line:'Professional', name:'Pro 15-15-15 Geranium',    npk:'15-15-15', N:15,P:15,K:15, gpg:3.80, pf:46,
+   phD:{m70:-.45,m75:-.62,w65:-.30,w70:-.45,ro:-.35}, foliarOK:true,
+   mix:'Balanced NPK for geraniums and neutral pH-loving plants.',
+   notes:'Geraniums and neutral pH bedding plants. High P for root + bloom promotion.'},
+  {id:'p14',line:'Professional', name:'Pro 15-2-20 Spring Pansy', npk:'15-2-20', N:15,P:2, K:20, gpg:3.80, pf:46,
+   phD:{m70:-.45,m75:-.62,w65:-.30,w70:-.45,ro:-.35}, foliarOK:false,
+   mix:'Cool-season pansy formula. Dissolve in warm water.',
+   notes:'Spring pansies in cool conditions. Low-P, high-K for compact prolific blooms.'},
+  {id:'p15',line:'Professional', name:'Pro 17-3-19 Fall Pansy',   npk:'17-3-19', N:17,P:3, K:19, gpg:3.80, pf:50,
+   phD:{m70:-.48,m75:-.65,w65:-.33,w70:-.48,ro:-.38}, foliarOK:false,
+   mix:'Fall cool-season formula. Dissolve in warm water.',
+   notes:'Fall pansies. Low-P, higher N for fall feeding conditions.'},
+  {id:'p16',line:'Professional', name:'Pro 17-4-17 Pure Water LX', npk:'17-4-17', N:17,P:4, K:17, gpg:3.80, pf:51,
+   phD:{m70:-.52,m75:-.70,w65:-.37,w70:-.52,ro:-.42}, foliarOK:false,
+   mix:'LX formula for pure/soft water. Dissolve in warm water.',
+   notes:'LX general-purpose for pure or soft water. Tank-mixable.'},
+
+  /* ── Supplements ── */
+  {id:'s01',line:'Supplement', name:"Epsom Salt — Jack's Nutrients (MgSO₄)",   npk:'0-0-0 Mg+S', N:0,P:0,K:0, gpg:1.20, pf:15,
+   phD:{m70:-.05,m75:-.06,w65:-.03,w70:-.05,ro:-.04}, foliarOK:true, isEpsom:true,
+   mix:"Pure MgSO₄ — dissolve separately in warm water. Add LAST after base nutrients.",
+   notes:"Jack's brand pharmaceutical-grade Epsom Salt. Corrects Mg deficiency (interveinal chlorosis). Standard 3-2-1 rate: 1.2 g/gal."},
+  {id:'s02',line:'Supplement', name:"Epsom Salt — Sam's Club Member's Mark",   npk:'0-0-0 Mg+S', N:0,P:0,K:0, gpg:1.20, pf:15,
+   phD:{m70:-.05,m75:-.06,w65:-.03,w70:-.05,ro:-.04}, foliarOK:true, isEpsom:true,
+   mix:"Member's Mark MgSO₄ (2×7 lb ~$9.98). Dissolve separately in warm water. Add LAST.",
+   notes:"Sam's Club Member's Mark. Pure MgSO₄ heptahydrate — functionally identical to Jack's brand at lower cost. Use interchangeably."},
+];
+
+/* ── Build product picker dropdown ── */
+function buildPicker(){
+  var sel = document.getElementById('prod-picker');
+  var lines = {};
+  PRODUCTS.forEach(function(p){ if(!lines[p.line]) lines[p.line]=[]; lines[p.line].push(p); });
+  Object.keys(lines).forEach(function(line){
+    var og = document.createElement('optgroup');
+    og.label = "Jack's "+line;
+    lines[line].forEach(function(p){
+      var o = document.createElement('option');
+      o.value = p.id;
+      o.textContent = p.name + '  ('+p.npk+')';
+      og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+}
+
+/* ── helpers ── */
+function findProd(id){ return PRODUCTS.find(function(p){ return p.id===id; }); }
+function gToM(g){
+  if(g<=0) return '0g';
+  var t=g/5.9;
+  if(t<0.06)  return g.toFixed(2)+'g';
+  if(t<=0.145)return'⅛ tsp';if(t<=0.27)return'¼ tsp';if(t<=0.42)return'⅓ tsp';
+  if(t<=0.63) return'½ tsp';if(t<=0.88)return'¾ tsp';if(t<=1.12)return'1 tsp';
+  if(t<=1.62) return'1½ tsp';if(t<=2.12)return'2 tsp';if(t<=2.62)return'2½ tsp';
+  if(t<3.4)   return'3 tsp/1 tbsp';
+  var tb=t/3;
+  if(tb<=1.5)return'1 tbsp';if(tb<=2.5)return'2 tbsp';if(tb<=3.5)return'3 tbsp';
+  if(tb<=4.5)return'4 tbsp';return tb.toFixed(1)+' tbsp';
+}
+function gToOz(g){ return (g/28.3495).toFixed(3)+' oz'; }
+function gToLb(g){ var l=g/453.592; return l>=0.05?l.toFixed(3)+' lb':null; }
+function ec(ppm){ return (ppm/700).toFixed(2); }
+function dv(ppm){ return DISP==='ppm'?ppm+' ppm':ec(ppm)+' mS/cm'; }
+function phBadge(ph){
+  if(ph<5.5) return {l:'Very Acidic',  b:'var(--red-bg)',    t:'var(--red-txt)'};
+  if(ph<6.0) return {l:'Acidic',       b:'var(--amber-bg)',  t:'var(--amber-txt)'};
+  if(ph<6.6) return {l:'Ideal Range',  b:'var(--green-bg)',  t:'var(--green-txt)'};
+  if(ph<7.0) return {l:'Slightly High',b:'var(--amber-bg)',  t:'var(--amber-txt)'};
+  return       {l:'Alkaline',          b:'var(--blue-bg)',   t:'var(--blue-txt)'};
+}
+function setDispMode(m){
+  DISP=m;
+  document.getElementById('seg-ppm').classList.toggle('active',m==='ppm');
+  document.getElementById('seg-ec').classList.toggle('active',m==='ec');
+  recompute();
+}
+function getSettings(){
+  var method = document.getElementById('g-method').value;
+  var vol    = parseFloat(document.getElementById('g-vol').value);
+  var str    = parseFloat(document.getElementById('g-str').value);
+  var water  = document.getElementById('g-water').value;
+  return {method,mc:METH[method],vol,str,water,startPh:WPH[water]||7.0};
+}
+
+/* ════════════════════════════════════════════
+   STACK MANAGEMENT
+════════════════════════════════════════════ */
+function addToStack(){
+  var id = document.getElementById('prod-picker').value;
+  if(!id) return;
+  var p = findProd(id);
+  if(!p) return;
+  STACK.push({p:p, parts:1});
+  recompute();
+}
+function removeFromStack(i){
+  STACK.splice(i,1);
+  recompute();
+}
+function clearStack(){
+  STACK=[];
+  recompute();
+}
+
+function recompute(){
+  renderMethodBanner();
+  if(!STACK.length){
+    document.getElementById('stack-empty').style.display='block';
+    document.getElementById('stack-area').style.display='none';
+    return;
+  }
+  document.getElementById('stack-empty').style.display='none';
+  document.getElementById('stack-area').style.display='block';
+  renderStack();
+}
+
+function setParts(i, val){
+  STACK[i].parts = parseInt(val);
+  recompute();
+}
+
+function renderStack(){
+  var s = getSettings();
+  var effStr = s.str * s.mc.mult;
+
+  /* Update PPM/EC header */
+  document.getElementById('ppm-ec-hd').textContent = DISP.toUpperCase();
+
+  /* ─── Compute per-item grams based on parts ratio ─── */
+  // Each item's grams per gallon is scaled by its parts ratio relative to 1 part
+  // parts=1 means standard label rate (gpg); parts=2 means 2× that rate, etc.
+  var totalPpm=0, totalPhDrop=0, totalG=0;
+  // For blended NPK: weight each product's N/P/K by its gram contribution
+  var weightedN=0, weightedP=0, weightedK=0, totalGperGal=0;
+
+  var itemData = STACK.map(function(item){
+    var p = item.p;
+    var parts = item.parts || 1;
+    var g = p.gpg * parts * s.vol * effStr;           // grams for this batch
+    var gPerGal = p.gpg * parts * effStr;              // g/gal for concentration calc
+    var ppm = Math.round(p.pf * p.gpg * parts * effStr);
+    var phd = ((p.phD&&p.phD[s.water])||-.45) * parts * effStr;
+    totalPpm += ppm;
+    totalPhDrop += phd;
+    totalG += g;
+    totalGperGal += gPerGal;
+    // Weighted NPK: each gram contributes its N/P/K % worth
+    weightedN += (p.N / 100) * gPerGal;
+    weightedP += (p.P / 100) * gPerGal;
+    weightedK += (p.K / 100) * gPerGal;
+    return {p:p, parts:parts, g:g, gPerGal:gPerGal, ppm:ppm, phd:phd};
+  });
+
+  // Blended NPK = weighted average as % of total gram mix
+  var blendN = totalGperGal > 0 ? (weightedN / totalGperGal * 100) : 0;
+  var blendP = totalGperGal > 0 ? (weightedP / totalGperGal * 100) : 0;
+  var blendK = totalGperGal > 0 ? (weightedK / totalGperGal * 100) : 0;
+
+  // Simplified blended ratio (normalize to lowest)
+  function simplifyRatio(n,p,k){
+    var min = Math.min(n,p,k);
+    if(min <= 0) return n.toFixed(1)+'-'+p.toFixed(1)+'-'+k.toFixed(1);
+    var div = min;
+    return (n/div).toFixed(1)+'-'+(p/div).toFixed(1)+'-'+(k/div).toFixed(1);
+  }
+
+  /* ─── Table body ─── */
+  var tbody = document.getElementById('stack-body');
+  tbody.innerHTML = '';
+
+  // Build parts selector HTML
+  function partsSelect(idx, current){
+    var html = '<select onchange="setParts('+idx+',this.value)" style="font-family:var(--fm);font-size:.72rem;font-weight:700;padding:.28rem .4rem;background:var(--bg2);border:1.5px solid var(--ink);border-radius:2px;width:72px;cursor:pointer">';
+    for(var n=1;n<=10;n++){
+      html += '<option value="'+n+'"'+(n===current?' selected':'')+'>'+n+' part'+(n>1?'s':'')+'</option>';
+    }
+    html += '</select>';
+    return html;
+  }
+
+  itemData.forEach(function(item, i){
+    var p = item.p;
+    var oz = gToOz(item.g), lb = gToLb(item.g);
+    // Per-product blended N/P/K contribution as % of blended total
+    var contribN = totalGperGal>0 ? (p.N/100*item.gPerGal/totalGperGal*100).toFixed(1) : '0';
+    var contribP = totalGperGal>0 ? (p.P/100*item.gPerGal/totalGperGal*100).toFixed(1) : '0';
+    var contribK = totalGperGal>0 ? (p.K/100*item.gPerGal/totalGperGal*100).toFixed(1) : '0';
+    var nf = (s.method==='foliar'&&!p.foliarOK) ? '<span class="tag red">NO FOLIAR</span>' : '';
+    var partTag = p.partA?'<span class="tag amber">Part A</span>':'';
+    partTag += p.partB?'<span class="tag red">Part B</span>':'';
+
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><span class="bold">'+p.name+'</span>'+nf+partTag+
+        '<div class="mono" style="font-size:.58rem;color:var(--ink3);margin-top:1px">'+p.npk+'</div></td>'+
+      '<td class="mono" style="font-size:.62rem;color:var(--ink3)">'+p.line+'</td>'+
+      '<td class="mono">'+p.npk+'</td>'+
+      '<td>'+partsSelect(i, item.parts)+'</td>'+
+      '<td class="mono">'+item.g.toFixed(2)+'g'+(lb?'<br><small style="font-size:.62rem">'+lb+'</small>':'')+'</td>'+
+      '<td>'+gToM(item.g)+'</td>'+
+      '<td class="mono">'+oz+'</td>'+
+      '<td class="mono">'+dv(item.ppm)+'</td>'+
+      '<td class="mono">'+contribN+'%</td>'+
+      '<td class="mono">'+contribP+'%</td>'+
+      '<td class="mono">'+contribK+'%</td>'+
+      '<td><button class="del-btn" onclick="removeFromStack('+i+')" title="Remove">✕</button></td>';
+    tbody.appendChild(tr);
+  });
+
+  var finalPh = Math.max(3.8, s.startPh + totalPhDrop);
+
+  /* ─── Summary / blended NPK footer row ─── */
+  var tfoot = document.getElementById('stack-foot');
+  tfoot.innerHTML = '';
+
+  // Row 1: raw sum totals
+  var tr2 = document.createElement('tr');
+  tr2.className = 'sum-row';
+  var blendedNpkStr = blendN.toFixed(1)+'-'+blendP.toFixed(1)+'-'+blendK.toFixed(1);
+  var partsStr = STACK.map(function(it){ return (it.parts||1)+' pt'; }).join(' + ');
+  tr2.innerHTML =
+    '<td>BLENDED SOLUTION &nbsp;<span style="font-size:.6rem;opacity:.7;font-weight:400">('+partsStr+')</span></td>'+
+    '<td></td>'+
+    '<td class="mono">'+blendedNpkStr+'</td>'+
+    '<td></td>'+  // parts col
+    '<td class="mono">'+totalG.toFixed(2)+'g</td>'+
+    '<td>'+gToM(totalG)+'</td>'+
+    '<td class="mono">'+gToOz(totalG)+'</td>'+
+    '<td class="mono">'+dv(totalPpm)+'</td>'+
+    '<td class="mono">'+blendN.toFixed(1)+'%</td>'+
+    '<td class="mono">'+blendP.toFixed(1)+'%</td>'+
+    '<td class="mono">'+blendK.toFixed(1)+'%</td>'+
+    '<td></td>';
+  tfoot.appendChild(tr2);
+
+  /* ─── Metric cards ─── */
+  var badge = phBadge(finalPh);
+  document.getElementById('metrics-area').innerHTML =
+    metric('Combined '+DISP.toUpperCase(), dv(totalPpm), DISP==='ppm'?'total dissolved solids':'mS/cm conductivity') +
+    metric('Blended NPK', blendedNpkStr, 'true weighted average') +
+    metric('Simplified Ratio', simplifyRatio(blendN,blendP,blendK), 'normalized to lowest value') +
+    metric('Est. Final pH', finalPh.toFixed(2), 'from pH '+s.startPh) +
+    metric('Total Grams', totalG.toFixed(2)+'g', s.vol+' gal at '+Math.round(effStr*100)+'% str.') +
+    metric('Products in Stack', STACK.length, 'products · parts: '+partsStr);
+
+  /* ─── Alerts ─── */
+  var alts = '';
+  var noFol = s.method==='foliar' ? STACK.filter(function(it){ return !it.p.foliarOK; }) : [];
+  if(noFol.length) alts += '<div class="alert alert-red">⛔ NOT safe for foliar spray: <strong>'+noFol.map(function(it){return it.p.name;}).join(', ')+'</strong>. Apply these as root drenches only.</div>';
+  var hasA = STACK.some(function(it){return it.p.partA;});
+  var hasB = STACK.some(function(it){return it.p.partB;});
+  if(hasA||hasB) alts += '<div class="alert alert-red">⚠ CRITICAL: Part A and Part B (Cal Nit) MUST each be dissolved in SEPARATE containers of water and added to the reservoir independently. Combining them concentrated causes irreversible Ca-phosphate precipitation.</div>';
+  var noCa = STACK.some(function(it){return it.p.id==='n11';});
+  if(noCa) alts += '<div class="alert alert-amber">⚠ 10-30-20 Bloom Booster contains NO calcium. Limit use to 1–2 weeks. Return to a calcium-containing base program (3-2-1, 12-4-16, 15-5-20) after use.</div>';
+  document.getElementById('alerts-area').innerHTML = alts;
+
+  /* ─── pH block ─── */
+  document.getElementById('ph-val').textContent = finalPh.toFixed(2);
+  document.getElementById('ph-from').textContent = 'from pH '+s.startPh+' ('+s.water+')';
+  var phEl = document.getElementById('ph-pill');
+  phEl.textContent = badge.l;
+  phEl.style.background = badge.b;
+  phEl.style.color = badge.t;
+  document.getElementById('ph-note').innerHTML =
+    '<strong>Application method tip:</strong> '+s.mc.tip+
+    '<br><br><strong>Target ranges:</strong> Hydro 5.5–6.2 &nbsp;·&nbsp; Soilless/peat-lite 6.0–6.5 &nbsp;·&nbsp; Soil 6.0–7.0 &nbsp;·&nbsp; Acid-loving 4.5–5.5 &nbsp;·&nbsp; Indoor houseplants 6.0–6.5'+
+    '<br><em style="color:var(--ink3)">Always verify with a calibrated pH meter after mixing. EC/TDS meter readings confirm solution strength.</em>';
+
+  /* ─── Mixing Order (pass scaled effStr per item) ─── */
+  buildMixOrder(s, effStr, itemData);
+
+  /* ─── Quick ref (single product) ─── */
+  if(STACK.length===1) buildQR(STACK[0].p);
+  else document.getElementById('qr-area').innerHTML='';
+}
+
+function metric(label, val, sub){
+  return '<div class="metric-card"><div class="mc-label">'+label+'</div><div class="mc-val">'+val+'</div><div class="mc-sub">'+sub+'</div></div>';
+}
+
+/* ─── MIXING ORDER ─── */
+function buildMixOrder(s, effStr, itemData){
+  // itemData is array of {p, parts, g, ppm} from renderStack
+  // Build a lookup by product id for gram amounts
+  var gMap = {};
+  if(itemData){
+    itemData.forEach(function(d){ gMap[d.p.id] = d.g; });
+  }
+  function getG(it){
+    return gMap[it.p.id] !== undefined ? gMap[it.p.id] : it.p.gpg*(it.parts||1)*s.vol*effStr;
+  }
+
+  var steps = [];
+  steps.push({
+    name: s.method==='foliar'?'Fill spray bottle / sprayer with water':'Fill reservoir or vessel with water',
+    npk:null, g:null,
+    note:'Start with water. Warm water (70–80°F) dissolves powders fastest. For RO/distilled: ALL Ca, Mg, and trace minerals must come from fertilizer. Pre-warm reservoir water when possible.',
+    nc:''
+  });
+
+  var pAs     = STACK.filter(function(it){ return it.p.partA; });
+  var pBs     = STACK.filter(function(it){ return it.p.partB; });
+  var epsoms  = STACK.filter(function(it){ return it.p.isEpsom; });
+  var singles = STACK.filter(function(it){ return !it.p.partA&&!it.p.partB&&!it.p.isEpsom; });
+
+  pAs.forEach(function(it){
+    var g = getG(it);
+    var partsNote = (it.parts&&it.parts>1) ? ' ['+it.parts+' parts]' : '';
+    steps.push({name:it.p.name+' — Part A (dissolve separately → add to reservoir)'+partsNote,npk:it.p.npk,g:g,
+      note:'CRITICAL: Dissolve Part A in a separate cup or bucket of warm water first. Stir until fully clear. Slowly pour into the main reservoir. NEVER combine Part A + Part B at high concentration — irreversible Ca-phosphate precipitation will occur.',nc:'crit'});
+  });
+  singles.forEach(function(it){
+    var g = getG(it);
+    var partsNote = (it.parts&&it.parts>1) ? ' ['+it.parts+' parts]' : '';
+    steps.push({name:it.p.name+partsNote,npk:it.p.npk,g:g,note:it.p.mix,nc:''});
+  });
+  pBs.forEach(function(it){
+    var g = getG(it);
+    var partsNote = (it.parts&&it.parts>1) ? ' ['+it.parts+' parts]' : '';
+    steps.push({name:it.p.name+' — Part B (dissolve separately → add after Part A is diluted)'+partsNote,npk:it.p.npk,g:g,
+      note:'CRITICAL: Dissolve Part B in a completely separate container of water. Only add to the main reservoir AFTER Part A is already fully dissolved and well-diluted in the bulk water.',nc:'crit'});
+  });
+  epsoms.forEach(function(it){
+    var g = getG(it);
+    var partsNote = (it.parts&&it.parts>1) ? ' ['+it.parts+' parts]' : '';
+    steps.push({name:it.p.name+partsNote,npk:'MgSO₄',g:g,
+      note:'Add Epsom Salt LAST among all nutrients. Dissolve separately in warm water first, then add to reservoir. Stir until fully clear.',nc:''});
+  });
+  steps.push({name:'Check EC/PPM — then adjust pH',npk:null,g:null,
+    note:'Measure EC/PPM first. Adjust pH with pH Up (KOH) or pH Down (H₃PO₄ / citric acid). Stir well. Allow 5–10 minutes to stabilize. Re-check before feeding. Document readings for each batch.',nc:''});
+
+  var ul = document.getElementById('mix-list');
+  ul.innerHTML = '';
+  steps.forEach(function(s,i){
+    var li = document.createElement('li');
+    li.className = 'mix-item';
+    var oz = s.g!==null?gToOz(s.g):null;
+    var lb = s.g!==null?gToLb(s.g):null;
+    var doseHtml = s.g!==null
+      ? '<div class="mix-dose"><div class="mix-dose-primary">'+gToM(s.g)+'</div>' +
+        '<div class="mix-dose-sub">'+s.g.toFixed(1)+'g | '+oz+(lb?'<br>'+lb:'')+'</div></div>'
+      : '<div class="mix-dose"><div class="mix-dose-sub" style="color:var(--ink4)">—</div></div>';
+    var noteHtml = s.note?'<div class="mix-note'+(s.nc?' '+s.nc:'')+'">'+s.note+'</div>':'';
+    li.innerHTML =
+      '<div class="mix-num">'+(i+1)+'</div>'+
+      '<div class="mix-body"><div class="mix-name">'+s.name+'</div>'+
+        (s.npk?'<div class="mix-npk">'+s.npk+'</div>':'')+noteHtml+
+      '</div>'+doseHtml;
+    ul.appendChild(li);
+  });
+}
+
+/* ─── QUICK REF ─── */
+function buildQR(p){
+  var refs=[
+    {l:'⅛ tsp/gal',g:.74,u:'Seedling / ultra-light CLF'},
+    {l:'¼ tsp/gal',g:1.48,u:'Indoor light CLF'},
+    {l:'½ tsp/gal',g:2.95,u:'Indoor standard CLF / light foliar'},
+    {l:'¾ tsp/gal',g:4.43,u:'Standard CLF'},
+    {l:'1 tsp/gal',g:5.90,u:'Outdoor / hydro full rate'},
+    {l:'1½ tsp/gal',g:8.85,u:'Heavy feeder CLF'},
+    {l:'1 tbsp/gal',g:17.7,u:'Full outdoor / weekly drench'},
+    {l:'2 tbsp/gal',g:35.4,u:'Heavy weekly drench'},
+    {l:'1 dry oz/gal',g:28.35,u:'Pro batch reference'},
+    {l:'~13 oz/100 gal',g:368.55,u:'Standard 100-gal CLF batch'},
+  ];
+  var html='<div style="border:1.5px solid var(--ink);border-radius:var(--r);overflow:hidden;margin-top:.875rem">'+
+    '<h3 class="sub-title">Quick Dose Reference — '+p.name+' ('+p.npk+')</h3>'+
+    '<table class="qr-table"><thead><tr><th>Measure / gal</th><th>Grams</th><th>PPM/gal</th><th>EC/gal</th><th>Use</th></tr></thead><tbody>';
+  refs.forEach(function(r){
+    var ppm=Math.round(p.pf*r.g);
+    html+='<tr><td class="bold">'+r.l+'</td><td class="mono">'+r.g.toFixed(2)+'g</td>'+
+      '<td class="mono">'+ppm+' ppm</td><td class="mono">'+ec(ppm)+'</td>'+
+      '<td class="text-muted">'+r.u+'</td></tr>';
+  });
+  html+='</tbody></table>'+
+    '<div style="padding:.65rem 1rem;font-size:.74rem;font-weight:700;color:var(--ink2);border-top:1px solid var(--rule);line-height:1.6">'+p.notes+'</div></div>';
+  document.getElementById('qr-area').innerHTML=html;
+}
+
+/* ─── METHOD BANNER ─── */
+function renderMethodBanner(){
+  var method = document.getElementById('g-method').value;
+  var mc = METH[method];
+  document.getElementById('method-banner').innerHTML =
+    '<div class="alert alert-blue" style="margin-top:.25rem">'+
+    '<strong>'+mc.icon+' '+mc.label+'</strong> — '+mc.tip+'</div>';
+}
+
+/* ════════════════════════════════════════════
+   PROGRAM PRESETS
+════════════════════════════════════════════ */
+var PRESETS = {
+  greenup:{
+    desc:"🌿 <strong>Green-Up / Rapid Vegetative Push</strong> — High-N formula combination designed to rapidly correct pale/chlorotic tissue and stimulate aggressive vegetative growth. Best used as CLF at full strength. Ideal for establishing new plantings, recovering stressed plants, or pushing transplants out of dormancy.",
+    ids:['c01','p02']  // All Purpose 20-20-20 + Pro 25-5-15
+  },
+  rootdev:{
+    desc:"🌱 <strong>Root Development — Transplant & Establishment</strong> — High-P program for stimulating rapid root mass at transplant. Used once to twice during establishment. Low N prevents excessive top growth while root system establishes. Follow with a balanced CLF program after 1–2 weeks.",
+    ids:['p09','s01']  // 9-45-15 Plant Starter + Epsom
+  },
+  generalveg:{
+    desc:"🌾 <strong>General Vegetative CLF</strong> — Balanced all-purpose program for continuous liquid feeding throughout the vegetative phase. Suitable for most crops in most growing media. Maintains steady EC and pH.",
+    ids:['c01']  // All Purpose 20-20-20
+  },
+  heavyveg:{
+    desc:"💪 <strong>Heavy Feeder Vegetative — High N</strong> — High-nitrogen program for aggressive vegetative crops in warm temperatures. Commercial greenhouse standard for heavy-feeding bedding plants, foliage, and vegetables in peat-lite media.",
+    ids:['p02','p06']  // 25-5-15 High Performance + 15-5-15 Ca-Mg LX
+  },
+  bloomtrigger:{
+    desc:"🌸 <strong>Bloom Enhancement / Trigger</strong> — High-phosphorus program for initiating and enhancing flowering. The P spike promotes bud initiation, increases blossom count, and improves color. Use at the onset of flowering for 1–2 weeks, then transition to a balanced bloom feed.",
+    ids:['c02','c01']  // Blossom Booster + All Purpose
+  },
+  fruitset:{
+    desc:"🍅 <strong>Fruit Set & Development</strong> — Calcium-rich program with elevated potassium for strong cell walls, blossom end rot prevention, and quality fruit development. Balanced N/P/K for sustained vegetative and fruiting growth simultaneously.",
+    ids:['c09','n02']  // Veggie FeED + Cal Nit
+  },
+  fruitfinish:{
+    desc:"🍇 <strong>Fruit Finish / Pre-Harvest K-Load</strong> — High-potassium finish program for densifying flowers, fruits, and buds in the final 1–2 weeks before harvest. Reduces N to minimize vegetative push. Follow with a plain-water flush.",
+    ids:['n12']  // 7-15-30 Finish
+  },
+  flowercolor:{
+    desc:"🌺 <strong>Flower Color & Bud Count Enhancement</strong> — High-P, elevated K program to intensify pigmentation, increase bud set, and extend bloom time. Combines bloom booster with iron-chelated formula for vibrant, long-lasting flowers.",
+    ids:['c02','c11']  // Blossom Booster + Petunia FeED
+  },
+  orchid_grow:{
+    desc:"🌺 <strong>Orchid — Vegetative / Growth Phase</strong> — General orchid health program for use when flower spikes are NOT present. Supports lush leaf growth and root development. Feed every watering at ¾ tsp/gal.",
+    ids:['c04']  // Orchid Liquid 7-5-6
+  },
+  orchid_bloom:{
+    desc:"🌺 <strong>Orchid — Bloom / Spike Phase</strong> — High-K orchid bloom program when flower spikes appear. Lower N + elevated K encourages bud set, prolific flowering, and extended bloom period. Switch back to 7-5-6 when spikes fade.",
+    ids:['c05']  // Orchid Bloom Booster 3-9-6
+  },
+  mum:{
+    desc:"🌼 <strong>Chrysanthemum / Mum Program</strong> — Specialized iron-chelated program for the heavy-feeding mum crop. Extra Mg, S, and Fe support lush green foliage and vibrant blooms. The FeED chelate system maintains iron availability even as substrate pH rises during the crop cycle.",
+    ids:['c10']  // Mum FeED 22-5-16
+  },
+  acidlover:{
+    desc:"🫐 <strong>Acid-Loving Plants Program</strong> — pH-lowering program for azaleas, blueberries, rhododendrons, camellias, and other calcifuge species. Combines acid formula with Berry Special for elevated micronutrient delivery. Apply as root drench only — NOT for foliar.",
+    ids:['c07','p11']  // Acid Special + Berry Special
+  },
+  hydrangea_blue:{
+    desc:"💙 <strong>Hydrangea Blue Color Enhancement</strong> — Aluminum sulfate + acidic nutrient program to lower substrate pH and maintain blue pigmentation in aluminum-sensitive hydrangea cultivars. Root drench ONLY. Will NOT change white varieties. Apply weekly during growing season.",
+    ids:['c08']  // Hydrangea Blue 7-3-3
+  },
+  indoor:{
+    desc:"🪴 <strong>Indoor Foliage / Houseplant CLF</strong> — Low-rate constant-liquid-feed program for indoor tropical foliage. Balanced N-P-K with micronutrients maintains green, healthy growth without salt accumulation in pots. Mix at ¼ tsp/gal every watering.",
+    ids:['c06']  // Houseplant Special 15-30-15
+  },
+  tropicals:{
+    desc:"🌴 <strong>Tropical & Palm Program</strong> — Elevated K, Mg, and S formula specifically designed to prevent salt buildup while delivering extra potassium and micronutrients for palms and tropical specimens. Prevents typical K and Mg deficiencies in palms.",
+    ids:['c14','s01']  // Tropical Food + Epsom
+  },
+  '321_veg':{
+    desc:"💧 <strong>3-2-1 Program — Vegetative</strong> — The flagship 3-part system. Industry standard for controlled-environment horticulture. Provides complete nutrition from primary through trace elements. Part A and Part B MUST be dissolved separately. 3.6g Part A + 2.6g Cal Nit + 1.2g Epsom per gallon.",
+    ids:['n01','n02','s01']  // 5-12-26 + Cal Nit + Epsom
+  },
+  '321_bloom':{
+    desc:"💧 <strong>3-2-1 Program — Bloom Transition</strong> — Modifies the standard 3-2-1 base with a high-P bloom booster for 1–2 weeks at the vegetative-to-bloom transition. Triggers flowering while maintaining base nutrition. Note: 10-30-20 contains NO calcium — use short-term only.",
+    ids:['n01','n02','n11','s01']  // 5-12-26 + Cal Nit + Bloom Booster + Epsom
+  },
+  '321_finish':{
+    desc:"💧 <strong>3-2-1 Program — Finish / K-Load</strong> — Final-stage finish program replacing Part A with the high-K Finish formula for the last 1–2 weeks before harvest. Densifies flowers and fruits. Follow with a clean-water flush.",
+    ids:['n12','n02','s01']  // 7-15-30 Finish + Cal Nit + Epsom
+  },
+  hydro_lettuce:{
+    desc:"🥬 <strong>Hydroponic Lettuce & Herbs</strong> — Single-bag hydroponic formula for recirculating systems growing leafy crops. Optimized EC range: 0.8–1.4 mS/cm (560–980 ppm). Adjust down for seedlings, up for mature plants. NFT, DWC, and aeroponic compatible.",
+    ids:['n09']  // 16-4-17 Hydroponic FeED
+  },
+  clone_starter:{
+    desc:"🌿 <strong>Clone / Seedling Starter</strong> — Very low-dose program for cuttings and seedlings from week 1 through transplant. Use at ¼ to ½ strength. Encourages root development without burning tender new growth.",
+    ids:['n10']  // 15-6-17 Clone FeED
+  },
+  fe_correct:{
+    desc:"⚡ <strong>Iron Chlorosis Correction</strong> — Chelated iron program for correcting interveinal chlorosis on young leaves (Fe deficiency). The Petunia FeED uses an advanced chelate system that stays available even as pH shifts. Combine with Acid Special if substrate pH is above 6.8. Foliar application corrects Fe deficiency 5× faster than root drench.",
+    ids:['c11','c07']  // Petunia FeED + Acid Special
+  },
+  acid_correct:{
+    desc:"🧪 <strong>pH Reduction / Acid Correction Program</strong> — Potent acid-lowering program for rapidly correcting high-pH substrate or water conditions. Contains elevated sulfur, iron, and aluminum sulfate. Use as soil drench only. Monitor pH closely — over-acidification can cause Mn toxicity in sensitive crops.",
+    ids:['c07','c08']  // Acid Special + Hydrangea Blue
+  },
+  mg_correct:{
+    desc:"✨ <strong>Magnesium Deficiency Correction</strong> — Epsom Salt (MgSO₄) program for correcting interveinal chlorosis caused by Mg deficiency on older/middle leaves. Symptoms: yellow tissue BETWEEN green veins on middle-aged leaves. Foliar application at ½ tsp/gal corrects Mg deficiency 3–5× faster than root drench. Sam's Club Member's Mark Epsom Salt is functionally identical to Jack's brand at significantly lower cost (~$9.98 for 2×7 lb). <strong>Dosing:</strong> Root drench 1 tsp/gal; Foliar ½ tsp/gal. Repeat every 5–7 days until new growth is normal. Always pair with a balanced base formula to avoid further nutrient imbalance.",
+    ids:['s02','c01']  // Sam's Epsom + All Purpose
+  },
+
+  // ── MACRONUTRIENT DEFICIENCY CORRECTIONS ──
+  n_deficiency:{
+    desc:"🟡 <strong>Nitrogen Deficiency — Recovery Program</strong> — Rapid N-replacement program for plants showing uniform yellowing beginning on the oldest/lowest leaves and progressing upward. Combines the highest-N professional formula (25-5-15 High Performance) with All Purpose 20-20-20 for a broad-spectrum N push. <strong>Symptoms to confirm:</strong> Uniform pale yellow-green to yellow older leaves, reduced internodal length, thin stems, early leaf drop, purpling of petioles in some species. <strong>Rx protocol:</strong> Apply at full strength as CLF for 2–3 consecutive waterings. Confirm EC/PPM is within target range — low EC at correct volume confirms underfeeding is the cause. Verify substrate pH is below 7.0 — ammonium-N becomes unavailable above pH 7.2. Check for root damage/rot which limits N uptake regardless of solution strength. Foliar spray with Pro 27-15-12 provides the fastest correction (nitrogen enters stomata directly). Resume balanced program once green color returns to new growth.",
+    ids:['p02','c01']  // 25-5-15 High Performance + 20-20-20
+  },
+  p_deficiency:{
+    desc:"🟠 <strong>Phosphorus Deficiency — Root Zone Correction</strong> — High-phosphorus corrective program for plants showing purple/reddish pigmentation on leaf undersides, petioles, and stems. P deficiency is frequently misdiagnosed — confirm before treating. <strong>Symptoms to confirm:</strong> Purple or bronze coloration on the undersides of older leaves, dark green upper surfaces, delayed flowering, poor root mass in seedlings. <strong>Critical distinction:</strong> Cold root zone temperatures below 55°F (13°C) dramatically reduce P uptake even when solution P is adequate — warm substrate before applying. <strong>Rx protocol:</strong> Apply 9-45-15 Plant Starter at ¼ to ½ strength for 1–2 weeks. Follow with 10-30-20 Blossom Booster to sustain elevated P. Do NOT over-correct — excess P induces Fe, Zn, and Mn lockout by competitive inhibition. Monitor pH and keep below 7.0.",
+    ids:['p09','c02']  // 9-45-15 Plant Starter + Blossom Booster
+  },
+  k_deficiency:{
+    desc:"🔥 <strong>Potassium Deficiency — K Restoration Program</strong> — High-potassium corrective program for plants showing marginal leaf scorch, weak stems, and poor fruit quality. K deficiency is common in heavy-fruiting crops and in high-sodium source water (Na+ competes with K+ at uptake sites). <strong>Symptoms to confirm:</strong> Marginal necrosis (tip and edge brown scorch) on OLDER leaves progressing inward, weak/floppy stems, wilting despite adequate irrigation, undersized or soft fruit, reduced turgor. <strong>Rx protocol:</strong> Apply 7-15-30 Finish at full CLF rate for 1–2 weeks. Pair with Veggie FeED 12-15-30 for fruiting crops (provides Ca to prevent BER simultaneously). <strong>Long-term management:</strong> Flush substrate to remove competing Na+ and Ca2+ salt accumulation. Test source water Na — above 70 ppm Na consistently displaces K. Switch to lower-Na water source if needed.",
+    ids:['n12','c09']  // 7-15-30 Finish + Veggie FeED
+  },
+  ca_deficiency:{
+    desc:"🦴 <strong>Calcium Deficiency — BER &amp; Tip Burn Prevention Program</strong> — Calcium-focused corrective program targeting the two most common Ca-deficiency disorders in horticultural crops: Blossom End Rot (BER) in fruiting vegetables and Tip Burn in lettuce and strawberry. <strong>Symptoms to confirm:</strong> BER — dark, sunken, leathery tissue at the blossom end of tomatoes, peppers, squash, and watermelon. Tip Burn — brown necrotic leaf margins on inner lettuce leaves or strawberry leaflets. Distorted cupped young leaves, growing point dieback, brown root tips. <strong>Important physiology note:</strong> Ca moves passively with the transpiration stream — it CANNOT be redistributed from older tissue. Low transpiration (high humidity, low airflow) causes Ca deficiency even when solution Ca is adequate. <strong>Rx protocol:</strong> Increase solution Ca via 15-0-0 Cal Nit (Part B). Switch to 12-15-30 Veggie FeED for fruiting crops — it contains Ca and corrects BER. For RO growers: switch immediately to 15-5-20 RO FeED (7% Ca). Improve airflow and reduce humidity to increase transpiration. Avoid excess K and Mg which compete with Ca uptake.",
+    ids:['n02','c09']  // Cal Nit + Veggie FeED
+  },
+  s_deficiency:{
+    desc:"🌑 <strong>Sulfur Deficiency — Young Leaf Chlorosis Program</strong> — Sulfur deficiency mimics nitrogen deficiency but affects NEW/YOUNG leaves first rather than old — this distinction is diagnostic. S is immobile in the plant, so deficiency appears in actively growing tissue. <strong>Symptoms to confirm:</strong> Uniform pale yellow-green on youngest leaves and new growth, thin tissue, delayed maturity, mild interveinal pattern in some species. <strong>Cause:</strong> S deficiency is uncommon in most Jack's programs which include sulfate-based raw materials. It occurs most frequently with RO water, sulfate-free fertilizer sources, or in high-rainfall leached outdoor soils. <strong>Rx protocol:</strong> Add Epsom Salt (MgSO₄) at 1.2–2.4 g/gal — provides both Mg and sulfate-S simultaneously. Acid Special 17-6-6 contains elevated sulfur and corrects S deficiency while lowering pH. Potassium sulfate (K₂SO₄) is an alternative S source. Recovery is typically visible within 7–10 days in warm, bright conditions.",
+    ids:['s01','c07']  // Jack's Epsom + Acid Special
+  },
+
+  // ── MICRONUTRIENT DEFICIENCY CORRECTIONS ──
+  fe_foliar:{
+    desc:"🌿 <strong>Iron Chlorosis — Emergency Foliar Correction</strong> — Rapid-response foliar application program for severe iron deficiency chlorosis when root-applied corrections are too slow. Foliar Fe uptake corrects deficiency 5× faster than soil/substrate application. <strong>Symptoms to confirm:</strong> Bright yellow tissue between DISTINCTLY GREEN veins on the YOUNGEST leaves and growing tips (diagnostic for Fe — older leaves remain green initially). Progressive yellowing of veins in severe cases. Growing tip death in extreme deficiency. <strong>Rx protocol:</strong> Spray Petunia FeED 20-6-22 at ½ tsp/gal directly onto affected foliage early morning or evening — the chelated FeED system penetrates leaf cuticle efficiently. Apply every 3–4 days until new growth emerges green. <strong>Simultaneously address root cause:</strong> Lower substrate pH to 5.8–6.5 (Fe solubility drops sharply above pH 6.5 in soilless and 7.0 in soil). Apply Acid Special 17-6-6 as root drench. Excess P in substrate competes with Fe — avoid high-P fertilizers during recovery.",
+    ids:['c11','c07']  // Petunia FeED (foliar) + Acid Special (drench)
+  },
+  mn_deficiency:{
+    desc:"🟤 <strong>Manganese Deficiency — pH &amp; Micronutrient Correction</strong> — Mn deficiency is almost always pH-induced in containerized horticulture. <strong>Diagnostic distinction from Fe:</strong> Mn deficiency affects MIDDLE-AGE leaves (not youngest like Fe). Grayish-green mottling precedes full interveinal yellowing. Progresses from inner/older leaves outward. <strong>Cause:</strong> Substrate pH above 6.5 ties up Mn in peat-based media. Low fertilizer rate, excessive chelated iron application, or high leaching rates also contribute. <strong>Rx protocol:</strong> Lower substrate pH below 6.5 using Acid Special 17-6-6 or injecting phosphoric/citric acid. Switch to a peat-lite formulation with elevated micronutrients (Pro 20-10-20 Peat-Lite) which provides elevated Mn vs. general-purpose grades. <strong>Correction timeline:</strong> 6 days in warm, sunny, fast-growing conditions; up to several weeks in cool, low-light environments. <strong>Caution:</strong> At pH below 5.5, Mn becomes highly soluble and TOXICITY occurs — especially in geraniums, marigolds, lisianthus, and New Guinea impatiens.",
+    ids:['p01','c07']  // Pro 20-10-20 Peat-Lite + Acid Special
+  },
+  zn_deficiency:{
+    desc:"🌿 <strong>Zinc Deficiency — Micronutrient Correction Program</strong> — Zinc deficiency is most common in high-pH calcareous soils and in programs with excessive phosphorus application. <strong>Symptoms to confirm:</strong> 'Little leaf' syndrome — abnormally small, narrow leaves; shortened internodes; rosette growth habit; interveinal chlorosis on OLDER leaves (like Mn, distinct from Fe which affects new growth). Bronze or reddish tints in some species. <strong>Cause:</strong> High substrate pH (above 7.0); excess P competitively inhibiting Zn uptake; sandy, low-organic soils with low Zn-holding capacity. <strong>Rx protocol:</strong> Lower pH to 6.0–6.5 target range using Acid Special. Temporarily reduce P application — excess P is the #1 cause of Zn-induced deficiency in container production. Most Jack's Peat-Lite formulas provide chelated Zn sufficient for normal CLF programs. Confirm deficiency with a tissue test before adding supplemental Zn salts — Zn toxicity is possible at low over-application rates.",
+    ids:['p01','c07']  // Pro 20-10-20 Peat-Lite + Acid Special
+  },
+  b_deficiency:{
+    desc:"🔵 <strong>Boron Deficiency — Growing Tip &amp; Stem Disorder</strong> — Boron is essential for cell wall formation, pollination, and meristematic development. It has the narrowest sufficiency range of all micronutrients — deficiency and toxicity are both common. <strong>Symptoms to confirm:</strong> Distorted, thickened, brittle young leaves; death of shoot apical meristem (growing tip dies back); hollow or cracked stems (especially celery, broccoli); poor pollen viability and reduced fruit set; blossom drop; corky surface lesions on fruit. <strong>Cause:</strong> pH above 7.0 reduces B availability; high Ca levels inhibit B translocation; dry substrate reduces B mobility (B moves with water); sandy soils are inherently low in B. <strong>Rx protocol:</strong> Ensure pH is below 6.5. Most Jack's Pro Peat-Lite formulas include B at standard CLF rates — confirm you are applying at adequate concentration (low EC is a common cause). Maintain consistent irrigation to ensure B mobility. Consult JR Peters technical team for Elementals boron supplement if deficiency persists.",
+    ids:['p01','n02']  // Pro 20-10-20 Peat-Lite + Cal Nit
+  },
+  cu_deficiency:{
+    desc:"🟣 <strong>Copper Deficiency — Young Tissue Correction Program</strong> — Copper deficiency is rare in programs using quality commercial fertilizers but occurs in high-pH, high-P, or heavily leached systems. <strong>Symptoms to confirm:</strong> Wilting and bluish-green discoloration of young leaves even with adequate water; twisted, distorted new growth; failure of shoot tips to elongate; necrosis of growing tips in severe cases; poor grain/seed fill in cereal crops. <strong>Cause:</strong> pH above 7.0; excess P or Zn competing with Cu; sandy, low-organic soils; over-limed substrates; high nitrogen causing dilution effect. <strong>Rx protocol:</strong> Lower pH to 6.0–6.5. Most Jack's Peat-Lite and complete formulas supply adequate Cu when applied at full CLF rates — confirm you are not under-feeding. Foliar Cu applications correct deficiency faster than soil application. Contact JR Peters lab services for tissue testing to confirm — Cu toxicity from over-application causes root damage and is difficult to reverse.",
+    ids:['p01','c07']  // Pro 20-10-20 Peat-Lite + Acid Special
+  },
+  mo_deficiency:{
+    desc:"🟣 <strong>Molybdenum Deficiency — Low-pH Induced Correction</strong> — Molybdenum deficiency is almost universally caused by substrate pH below 5.5 — Mo availability increases dramatically as pH rises, making this a pH management problem rather than a Mo supply problem. <strong>Symptoms to confirm:</strong> Marginal scorch and cupping/rolling of older leaves; pale yellow-green interveinal chlorosis; in brassicas: 'whiptail' — narrow, strap-like distorted leaves with little or no lamina; flower development failure. <strong>Cause:</strong> Substrate pH below 5.5 (most common); Mo is antagonized by high sulfate levels; leached sandy acidic soils. <strong>Rx protocol:</strong> Raise substrate pH above 5.8 — this alone typically corrects Mo deficiency within 1–2 weeks. Switch from acid fertilizer to basic or neutral formula (20-10-20 Peat-Lite). Most Jack's complete formulas contain sufficient Mo at standard CLF rates — the issue is pH-driven unavailability, not supply.",
+    ids:['p01','p07']  // Pro 20-10-20 Peat-Lite + Pro 21-5-20 LX (pH-neutral)
+  },
+
+  // ── pH & SALT CORRECTIONS ──
+  alkaline_raise:{
+    desc:"⬆️ <strong>Low pH — Alkalinity Restoration Program</strong> — Corrective program for substrates or solutions that have become too acidic (pH below 5.5), causing Mn and Fe toxicity in sensitive crops. <strong>When to use:</strong> pH pour-through readings below 5.5; tan/brown speckling on older leaves (Mn toxicity); blue-green leaves with brown patches (Fe toxicity at pH below 4.5); root damage. <strong>Rx protocol:</strong> Switch immediately to a neutral or basic fertilizer — Pro 20-10-20 Peat-Lite has a neutral-to-basic reaction and will help buffer pH upward. Pro 21-5-20 All Purpose LX is ideal for high-alkalinity water and helps buffer against further acidification. Apply flowable limestone (calcium carbonate suspension) or potassium bicarbonate drench to rapidly raise pH if below 5.0. Eliminate all acid fertilizers (Acid Special, Hydrangea Blue). Monitor substrate pH weekly — peat-based media naturally acidify over 8–10 weeks of production.",
+    ids:['p01','p07']  // Pro 20-10-20 Peat-Lite + Pro 21-5-20 LX
+  },
+  salt_flush:{
+    desc:"🧂 <strong>Salt Stress / High EC — Flush &amp; Recovery Program</strong> — Salt accumulation correction program for plants showing tip burn, marginal necrosis, wilting despite adequate irrigation, or white crystalline deposits on substrate surface — all signs of elevated soluble salts. <strong>Osmotic stress mechanism:</strong> When substrate EC exceeds plant root osmotic potential, water moves OUT of roots into substrate (reverse osmosis effect), causing physiological drought despite wet conditions. <strong>Rx protocol — immediate:</strong> (1) Flush with 2–3× pot volume of clean water (RO or low-EC water preferred). (2) Allow substrate to partially dry before re-irrigating. (3) Resume feeding at ½ strength. (4) Check source water TDS — if above 200 ppm, switch to RO or softer water. <strong>Long-term:</strong> Implement monthly leaching (apply 150% of normal irrigation volume to flush accumulated salts). Switch to 15-5-20 RO FeED for pure water programs. Confirm EC with a calibrated meter at every tank change.",
+    ids:['n07','s02']  // 15-5-20 RO FeED + Epsom (gentle restart program)
+  },
+  bicarbonate:{
+    desc:"💧 <strong>High Bicarbonate Source Water — Alkalinity Reduction Program</strong> — For growers using municipal or well water with high carbonate/bicarbonate alkalinity (above 150 ppm CaCO₃ equivalent), which progressively raises substrate pH with every irrigation. <strong>Mechanism:</strong> Bicarbonate ions (HCO₃⁻) react with H⁺ in the substrate, consuming acidity and raising pH — this is called alkalinity push. Over weeks, substrate pH can rise to 7.5+ even when starting at 6.0. <strong>Rx protocol:</strong> (1) Use Jack's 12-4-16 Tap Water FeED or 15-5-20 Tap Water FeED — both have potential acidity that counteracts bicarbonate alkalinity. (2) Inject acid (phosphoric, citric, or sulfuric) into irrigation water to neutralize bicarbonate before application. (3) Apply Acid Special 17-6-6 as alternating drench to manage pH. <strong>Target:</strong> Water alkalinity for irrigating sensitive crops should be 40–100 ppm CaCO₃. Send water sample to JR Peters Lab Services for a complete water analysis and fertility recommendation.",
+    ids:['n05','c07']  // 12-4-16 Tap Water FeED + Acid Special
+  },
+
+  // ── ENVIRONMENTAL & CULTURAL CORRECTIONS ──
+  rootrot_recovery:{
+    desc:"🌱 <strong>Root Rot Recovery — Post-Pathogen Restart Program</strong> — Nutrition program for plants recovering from Pythium, Phytophthora, Fusarium, or Rhizoctonia root diseases. Root rot severely limits nutrient and water uptake — applying full-strength fertilizer to damaged roots causes further salt stress and retards recovery. <strong>Rx protocol — phase 1 (Week 1–2):</strong> Treat with appropriate fungicide/biocontrol (Trichoderma, Streptomyces, copper-based). Apply fertilizer at ¼ strength only — 15-6-17 Clone FeED is ideal for its low EC and root-promoting nutrition profile. Ensure excellent drainage and substrate aeration (add perlite). Reduce irrigation frequency dramatically — allow substrate to approach dryness between waterings to encourage root air-pruning and regrowth. <strong>Phase 2 (Week 3–4):</strong> Gradually increase to ½ strength, then full CLF as new white root tips appear. <strong>Long-term:</strong> Avoid overwatering. Consider hydrogen peroxide drench (3% at 1:50 dilution) to oxygenate root zone and suppress pathogens.",
+    ids:['n10','s01']  // 15-6-17 Clone FeED + Epsom (gentle restart)
+  },
+  heat_stress:{
+    desc:"🌡️ <strong>Heat Stress Recovery — Electrolyte &amp; Nutrition Restore</strong> — Corrective nutrition program for plants that have experienced heat stress above 95°F (35°C). Heat stress causes stomatal closure, wilting, accelerated transpiration-driven ion accumulation, and disruption of enzyme function. <strong>Immediate actions:</strong> Move plants to cooler environment or increase evaporative cooling. Mist foliage with plain water to cool leaf surface temperature. <strong>Nutrition protocol:</strong> Apply a balanced low-EC fertilizer solution (½ strength) immediately after heat event — heat-stressed plants often show Ca, K, and Mg imbalance due to disrupted transpiration. Add Epsom Salt to address Mg displacement. Use 15-5-20 RO FeED if water quality is good — its Ca + Mg content supports electrolyte restoration. Avoid high-N fertilizers immediately after stress — wait 24–48 hours. <strong>Foliar application</strong> of All Purpose 20-20-20 at ¼ tsp/gal can be beneficial once leaf temperature has normalized.",
+    ids:['n07','s01']  // 15-5-20 RO FeED + Epsom
+  },
+  transplant_shock:{
+    desc:"🌿 <strong>Transplant Shock — Establishment Support Program</strong> — Purpose-built nutrition program for the critical 1–2 week period following transplanting when root systems are disrupted and water/nutrient uptake is severely compromised. <strong>Mechanism of shock:</strong> Transplanting severs fine root hairs responsible for water and nutrient absorption. Until new roots regenerate, the plant cannot replace water lost through transpiration or absorb adequate nutrition. <strong>Rx protocol:</strong> Apply 9-45-15 Plant Starter at ¼–½ strength as root drench at transplant — high P stimulates new root initiation and elongation. Follow at day 3–5 with 15-6-17 Clone FeED at ½ strength to support early nutrient uptake without salt stress. Add Epsom Salt at 1.2 g/gal for Mg support. <strong>Cultural practices:</strong> Shade transplants for 24–48 hours; apply anti-transpirant spray; maintain high relative humidity (above 70%); water immediately after transplant with plain water followed 2–3 hours later with starter solution.",
+    ids:['p09','n10','s01']  // 9-45-15 Plant Starter + Clone FeED + Epsom
+  },
+  overwater_recovery:{
+    desc:"💧 <strong>Overwatering Recovery — Root Zone Restoration Program</strong> — Nutrition and management program for plants suffering from chronic overwatering / root hypoxia (oxygen deprivation). <strong>Symptoms to confirm:</strong> Wilting despite saturated substrate; uniform yellowing (N deficiency appearance) despite adequate fertilizer rate; soft dark-brown root tips; slow or no response to fertilizer changes; anaerobic/sour smell from substrate. <strong>Mechanism:</strong> Waterlogged substrate excludes oxygen, killing aerobic root cells and enabling anaerobic pathogens (Pythium). Even if nutrients are present, oxygen-deprived roots cannot absorb them. <strong>Rx protocol:</strong> (1) Allow substrate to dry significantly between waterings — use the lift-test (pick up pot, irrigate only when it feels light). (2) Improve drainage — repot into well-draining substrate with 20–30% perlite. (3) Resume feeding at ¼ strength with Clone FeED — lowest EC formula minimizes additional salt load on damaged roots. (4) Apply hydrogen peroxide drench (1 tsp 3% H₂O₂ per gallon) to oxygenate rhizosphere. (5) Increase substrate temperature if possible — warmer roots recover faster.",
+    ids:['n10']  // 15-6-17 Clone FeED (low EC, gentle restart)
+  },
+  frost_recovery:{
+    desc:"❄️ <strong>Frost / Cold Damage Recovery Program</strong> — Post-frost nutrition program for plants that have experienced cellular damage from freezing temperatures. Frost ruptures cell membranes, causes electrolyte leakage, and disables root function. <strong>Critical first step:</strong> Do NOT apply fertilizer to frozen or thawing tissue — allow plants to thaw naturally and stabilize for 24–48 hours before any nutrition application. Remove visibly dead/black tissue only after fully thawed. <strong>Rx protocol — Week 1:</strong> Apply plain water at room temperature only. <strong>Week 2:</strong> Begin with ¼ strength All Purpose 20-20-20 — balanced N-P-K with micronutrients supports tissue regeneration without stressing damaged roots. Add Epsom Salt at 0.6 g/gal (½ normal rate) for Mg support. <strong>Week 3+:</strong> Gradually increase to full CLF rate as new healthy growth emerges. <strong>For citrus and tropical species:</strong> Apply Citrus Food 20-10-20 as recovery program — elevated K supports re-hardening.",
+    ids:['c01','s01']  // All Purpose + Epsom
+  },
+  drought_recovery:{
+    desc:"☀️ <strong>Drought / Underwatering Recovery Program</strong> — Nutrition and irrigation program for plants that have experienced water stress from missed irrigations or inadequate water supply. Wilting, crispy leaf margins, and hardened substrate are characteristic. <strong>Critical rehydration step:</strong> Do NOT apply full-strength fertilizer to severely drought-stressed plants — concentrated solution applied to dehydrated roots causes osmotic injury (reverse osmosis effect). <strong>Rx protocol:</strong> (1) Rehydrate substrate slowly with plain water first — if substrate is severely dry, bottom-water for 30–60 minutes before top irrigating. (2) Apply first fertilizer application at ¼ strength, 24 hours after rehydration. (3) Use All Purpose 20-20-20 at ½ strength with Epsom Salt at standard rate for the first 3–5 days. (4) Resume normal CLF program once new growth appears and plant is fully turgid. <strong>For stressed fruiting crops:</strong> Add Veggie FeED 12-15-30 for calcium support — drought interrupts Ca translocation and increases BER risk.",
+    ids:['c01','s01','c09']  // All Purpose + Epsom + Veggie FeED
+  },
+  ber_prevention:{
+    desc:"🍅 <strong>Blossom End Rot (BER) Prevention — Calcium Program</strong> — Targeted calcium delivery program for tomatoes, peppers, cucumbers, squash, and watermelon during the critical early fruit development period when BER risk is highest. <strong>BER physiology:</strong> BER is NOT caused by Ca deficiency in the soil — it is caused by inadequate Ca delivery to rapidly expanding fruit tissue. Ca moves only with the transpiration stream and cannot be remobilized from older tissue. High transpiration demand in vegetative tissue outcompetes fruit for available Ca, especially in warm, low-humidity, or windy conditions. <strong>Rx protocol:</strong> (1) Apply Veggie FeED 12-15-30 (contains Ca) at every watering as CLF. (2) Add 15-0-0 Cal Nit (Part B) at 1.3 g/gal for additional soluble Ca. (3) Maintain consistent irrigation — irregular wet/dry cycles are the primary cultural trigger for BER. (4) Avoid excess K and Mg which compete with Ca uptake. (5) Maintain pH at 6.2–6.8 for maximum Ca availability in soil. <strong>Foliar Ca sprays are largely ineffective</strong> for BER since Ca cannot move from leaves to fruit.",
+    ids:['c09','n02']  // Veggie FeED + Cal Nit
+  },
+  tip_burn:{
+    desc:"🥬 <strong>Tip Burn — Lettuce &amp; Indoor Crop Correction Program</strong> — Calcium-translocation program specifically addressing tip burn, the most economically significant quality disorder in hydroponic and greenhouse lettuce production. Also affects strawberry, basil, and some ornamentals. <strong>Physiology:</strong> Tip burn is caused by insufficient Ca delivery to the innermost young leaves, which have low transpiration rates and thus receive little Ca via the xylem stream. It is a Ca distribution problem, NOT a Ca deficiency in the nutrient solution. <strong>Key distinction:</strong> EC that is too high restricts overall water uptake and worsens tip burn. Counterintuitively, REDUCING fertilizer rate and EC often improves tip burn more effectively than increasing Ca. <strong>Rx protocol:</strong> (1) Reduce overall EC to 0.8–1.2 mS/cm for lettuce. (2) Increase airflow across the canopy — air movement improves transpiration in inner leaves. (3) Ensure adequate solution Ca — use 16-4-17 Hydroponic FeED which is formulated for recirculating lettuce production. (4) Add Cal Nit at low rate (0.65 g/gal) to supplement Ca without raising EC excessively. (5) Avoid rapid humidity changes and maintain 60–80% RH.",
+    ids:['n09','n02']  // 16-4-17 Hydroponic FeED + Cal Nit
+  },
+  interveinal_all:{
+    desc:"🔬 <strong>Interveinal Chlorosis — Broad-Spectrum Diagnostic &amp; Correction Program</strong> — Multi-target corrective program for interveinal chlorosis when the specific deficient element has not yet been confirmed. Interveinal chlorosis (green veins, yellow tissue between veins) can be caused by Fe, Mn, Mg, Zn, or S deficiency — each with distinct leaf-age distribution that guides diagnosis. <strong>Diagnostic key:</strong> NEW/YOUNGEST leaves affected first → Iron deficiency (pH too high). MIDDLE-AGE leaves affected first → Manganese deficiency (pH too high). OLDER leaves affected first → Magnesium deficiency (Mg not reaching new growth). ALL leaf ages → Sulfur (uniform across new tissue). <strong>Broad-spectrum Rx protocol:</strong> (1) Lower pH to 5.8–6.2 immediately — this alone resolves Fe and Mn lockout in 80% of cases. (2) Apply Epsom Salt at 2.4 g/gal (double rate) for Mg. (3) Switch to Petunia FeED 20-6-22 with chelated FeED system and add Mum FeED 22-5-16 for chelated Fe + Mg + S. (4) Apply Acid Special 17-6-6 as root drench if substrate pH is confirmed above 6.5. (5) Conduct tissue and substrate pH tests to confirm diagnosis before making permanent program changes.",
+    ids:['c11','c10','s01','c07']  // Petunia FeED + Mum FeED + Epsom + Acid Special
+  },
+};
+
+function loadPreset(){
+  var key = document.getElementById('preset-sel').value;
+  var descEl = document.getElementById('preset-desc');
+  var resultEl = document.getElementById('preset-result');
+  if(!key){ descEl.style.display='none'; resultEl.innerHTML=''; return; }
+  var pr = PRESETS[key];
+  if(!pr){ return; }
+  descEl.style.display='block';
+  descEl.innerHTML = pr.desc;
+  // Build stack from preset
+  STACK = pr.ids.map(function(id){ return {p:findProd(id), parts:1}; }).filter(function(it){return it.p;});
+  var html = '<div class="alert alert-green" style="margin-top:.5rem">✅ Preset loaded — '+STACK.length+' product'+(STACK.length!==1?'s':'')+' added to the Nutrient Stack Builder below. Scroll down to see calculations, mixing order, and doses.</div>';
+  html += STACK.map(function(it){
+    return '<div style="padding:.3rem 0;font-size:.8rem;font-weight:700;border-bottom:1px solid var(--rule)">'+
+      '<span class="mono" style="font-size:.62rem;color:var(--ink3)">'+it.p.line+'</span> &nbsp; '+it.p.name+
+      ' <span class="tag">'+it.p.npk+'</span></div>';
+  }).join('');
+  resultEl.innerHTML = html;
+  recompute();
+  // Scroll to stack
+  setTimeout(function(){ document.querySelector('.card:nth-child(4)').scrollIntoView({behavior:'smooth',block:'start'}); }, 200);
+}
+
+/* ════════════════════════════════════════════
+   TROUBLESHOOTING DATA
+════════════════════════════════════════════ */
+var SYMPTOMS = {
+  macro:[
+    {icon:'🟡',color:'var(--amber-bg)',label:'Nitrogen Deficiency (N)',
+     symptoms:['Uniform yellowing (chlorosis) starting on OLDEST/LOWER leaves first — progresses upward','Stunted growth, thin stems, small leaves','Leaves drop prematurely','Purpling of stems and petioles (some crops)'],
+     cause:'Insufficient N in solution; pH-induced lockout; overwatering / root damage limiting uptake.',
+     rx:"<strong>Immediate:</strong> Increase N concentration — switch to or add a high-N formula (20-20-20, 25-5-15, 21-5-20 LX). Foliar spray with 27-15-12 Foliar Feed for rapid correction. <strong>Root cause:</strong> Check EC/PPM — low readings confirm under-feeding. Check substrate pH — N lockout occurs above pH 7.0 in some forms. Check for root rot or overwatering.",
+     rxClass:'rx-box rx-amber'},
+    {icon:'🟠',color:'var(--orange-bg)',label:'Phosphorus Deficiency (P)',
+     symptoms:['Purple/red coloration on leaf undersides, stems, and petioles','Dark green older leaves turning bronze','Delayed flowering, poor root development','Reduced stem elongation in seedlings'],
+     cause:'Low P in solution; high pH (above 7.0) locks out P; cold substrate temperatures below 55°F.',
+     rx:"<strong>Immediate:</strong> Switch to high-P formula: 10-30-20 Blossom Booster (Classic or Nutrients), 9-45-15 Plant Starter for young plants. <strong>Root cause:</strong> Check substrate temp — cold roots dramatically reduce P uptake. Check pH — keep below 7.0. Do not over-apply P: excess causes Fe, Zn, and Mn lockout.",
+     rxClass:'rx-box rx-amber'},
+    {icon:'🔥',color:'var(--red-bg)',label:'Potassium Deficiency (K)',
+     symptoms:['Marginal leaf scorch/browning (tip and edge necrosis) on OLDER leaves first','Weak stems, poor turgor, wilting despite adequate water','Poor fruit quality — soft, undersized fruit','Blossom end rot (combined with Ca deficiency)'],
+     cause:'Low K in solution; high-Na water displacing K; compacted or waterlogged substrate.',
+     rx:"<strong>Immediate:</strong> Switch to or add high-K formula: 7-15-30 Finish, 12-15-30 Veggie FeED, 16-5-25 Tropical Food. For fruiting crops near harvest, use 7-15-30 Finish. <strong>Long-term:</strong> Flush to remove salt accumulation. Avoid excessive Na in water source.",
+     rxClass:'rx-box rx-red'},
+    {icon:'🦴',color:'var(--blue-bg)',label:'Calcium Deficiency (Ca)',
+     symptoms:['Blossom end rot (BER) in tomatoes, peppers, squash','Tip burn on lettuce and strawberry','Distorted, cupped young leaves, growing tip dieback','Brown, necrotic root tips; poor root development'],
+     cause:'Insufficient Ca in solution (especially with RO water); poor translocation due to low transpiration (high humidity); excess K or Mg competing with Ca uptake.',
+     rx:"<strong>Immediate:</strong> Add 15-0-0 Cal Nit (Part B) — provides immediately available Ca. Use 12-15-30 Veggie FeED (contains Ca). For RO growers: switch to 15-5-20 RO FeED which contains 7% Ca. <strong>Cultural:</strong> Improve airflow and transpiration — Ca moves with water. Avoid over-humidifying. Avoid excess K.",
+     rxClass:'rx-box rx-blue'},
+    {icon:'💚',color:'var(--green-bg)',label:'Magnesium Deficiency (Mg)',
+     symptoms:['Interveinal chlorosis on MIDDLE-AGE leaves — green veins remain, tissue yellows between','Starts in interior leaves, progresses outward','Common in heavy-fruiting crops (tomato, pepper, fruiting veg)','Leaf curl and crispy margins in advanced cases'],
+     cause:'Low Mg in solution; high K competing with Mg uptake; pH above 7.0 reducing Mg availability.',
+     rx:"<strong>Immediate:</strong> Foliar spray Epsom Salt (MgSO₄) at ½ tsp/gal — foliar is 5× faster than root drench. Add Epsom to all subsequent reservoir mixes at 1.2 g/gal. <strong>Preventive:</strong> Always include Epsom Salt in 3-2-1 programs. Pro 15-5-15 Ca-Mg LX provides built-in Ca + Mg.",
+     rxClass:'rx-box rx-green'},
+    {icon:'🌑',color:'var(--bg3)',label:'Sulfur Deficiency (S)',
+     symptoms:['Uniform yellowing of YOUNG/NEW leaves — similar to N deficiency but affects new growth first','Thin, pale green tissue','Delayed maturity'],
+     cause:'Low S in solution; rare in most Jack\'s programs which include S.',
+     rx:"Jack's Classic and Nutrients formulas include sulfur. If S deficiency occurs, add Epsom Salt (MgSO₄ — magnesium sulfate) to the program at 1.2 g/gal. Epsom provides both Mg and S simultaneously.",
+     rxClass:'rx-box'},
+  ],
+  micro:[
+    {icon:'⚡',color:'var(--amber-bg)',label:'Iron Deficiency Chlorosis (Fe)',
+     symptoms:['Interveinal chlorosis on YOUNGEST leaves and growing tips first (diagnostic)','Bright yellow leaf tissue with distinctly green veins','Green veins become yellow in severe cases','Growing tip yellows, eventually dies back in extreme deficiency'],
+     cause:'High substrate pH (above 6.5 in soilless; above 7.0 in soil) rendering Fe insoluble; Fe not chelated; waterlogged roots; high P competing with Fe uptake; Mn toxicity.',
+     rx:"<strong>Most common cause: pH too high.</strong> Lower pH to 5.8–6.2 (hydro) or 6.0–6.5 (soil). Apply Jack's Petunia FeED 20-6-22 or Mum FeED 22-5-16 — both use advanced chelated FeED systems effective even at elevated pH. Foliar spray with Petunia FeED at ½ tsp/gal for rapid correction. Apply Acid Special 17-6-6 if substrate pH is high. Note: Fe chlorosis progresses from new tissue INWARD — this differentiates it from Mn or Zn deficiency.",
+     rxClass:'rx-box rx-amber'},
+    {icon:'🟤',color:'var(--orange-bg)',label:'Manganese Deficiency (Mn)',
+     symptoms:['Interveinal chlorosis on MIDDLE/INNER leaves (older than Fe deficiency)','Grayish-green mottling before full yellowing','Progresses from inner leaves outward','Common when pH exceeds 6.5 in peat-lite media'],
+     cause:'pH above 6.5 ties up Mn; low fertilizer rate; excessive chelated iron reducing Mn uptake; leaching.',
+     rx:"Reduce substrate pH below 6.5 using Acid Special 17-6-6 or inject acid into irrigation. Use peat-lite formulas with elevated micronutrients (20-10-20 Peat-Lite). Note: Mn toxicity occurs at pH below 5.5 — monitor closely in species like geraniums, marigolds, and impatiens. Correction can take 6 days (sunny/warm) to several weeks.",
+     rxClass:'rx-box rx-amber'},
+    {icon:'🔵',color:'var(--blue-bg)',label:'Boron Deficiency (B)',
+     symptoms:['Distorted, thickened, brittle young leaves and shoot tips','Hollow stems, cracked stems in celery and brassicas','Poor pollen viability, reduced fruit set','Growing tip dies back (meristematic damage)'],
+     cause:'Low B in solution; high Ca inhibiting B uptake; pH above 7.0; dry substrate conditions.',
+     rx:"Ensure pH is below 6.5. Most Jack's Pro and Peat-Lite formulas include sufficient B at full-rate CLF. If deficiency persists, consult JR Peters technical team for a Boron Elementals supplement. Avoid over-application — B toxicity margin is narrow.",
+     rxClass:'rx-box rx-blue'},
+    {icon:'🌿',color:'var(--green-bg)',label:'Zinc Deficiency (Zn)',
+     symptoms:['Small, narrow leaves — "little leaf" syndrome','Interveinal chlorosis on OLDER leaves (like Mn, not Fe)','Shortened internodes, rosetting','Common in high-pH calcareous soils'],
+     cause:'High pH; excess P competing with Zn; low Zn in solution.',
+     rx:"Lower pH to target range. Reduce P application temporarily — excess P induces Zn lockout. Most Jack's formulas include chelated Zn at standard CLF rates. Confirm with tissue test before adding supplemental Zn.",
+     rxClass:'rx-box rx-green'},
+    {icon:'🟣',color:'var(--purple-bg)',label:'Molybdenum Deficiency (Mo)',
+     symptoms:['Marginal scorch and cupping of older leaves','Pale yellow-green leaves with marginal necrosis','In brassicas: "whiptail" — narrow, strap-like leaves'],
+     cause:'Low pH (below 5.5) is most common — Mo availability drops sharply in acid conditions.',
+     rx:"Raise pH to above 5.8. Mo deficiency is rarely a nutrient supply issue — it is almost always pH-induced. Most Jack's formulas include sufficient Mo at CLF rates.",
+     rxClass:'rx-box'},
+  ],
+  tox:[
+    {icon:'🔥',color:'var(--red-bg)',label:'Nitrogen Toxicity',
+     symptoms:['Dark green, overly lush, soft vegetative growth','Excessive stretch, thin stems despite fast growth','Reduced flowering, bud set failure','Salt accumulation — white crust on substrate surface'],
+     cause:'Over-feeding N; excessive ammonium relative to nitrate; poor drainage accumulating salts.',
+     rx:"Reduce N concentration — switch to lower-N formula or increase water-only flushes. Flush substrate with clean water (2–3× pot volume) to remove accumulated salts. Use a potentiometric conductivity meter to track EC. Balance ammonium:nitrate ratio.",
+     rxClass:'rx-box rx-red'},
+    {icon:'🤎',color:'var(--orange-bg)',label:'Manganese Toxicity',
+     symptoms:['Tan-to-brown speckling on older leaves','Necrotic spots surrounded by yellow halo','Marginal browning on sensitive species (geraniums, marigolds, impatiens, New Guinea impatiens)','Occurs when pH drops below 5.5'],
+     cause:'pH too low (below 5.5) increases Mn solubility dramatically; excessive Mn in some fertilizer sources.',
+     rx:"Raise substrate pH above 6.0 using basic fertilizer (20-10-20 Peat-Lite) or liquid limestone products. Reduce fertilizer application rate. For geraniums, marigolds, and impatiens: maintain pH strictly at 6.0–6.5.",
+     rxClass:'rx-box rx-amber'},
+    {icon:'💀',color:'var(--red-bg)',label:'Salt Stress / High EC Toxicity',
+     symptoms:['Leaf tip burn on outer/older leaves','Wilting despite adequate soil moisture (osmotic stress)','Reduced water uptake, stunted growth','Root die-back — brown, mushy root tips'],
+     cause:'Over-fertilization; salt accumulation from hard water; insufficient leaching/flushing.',
+     rx:"Flush substrate with clean water (2–3× pot volume). Reduce fertilizer rate by 25–50%. Switch to RO or softer water if alkalinity is contributing. Implement a regular monthly flush protocol. Target EC/PPM appropriate for crop and growth stage.",
+     rxClass:'rx-box rx-red'},
+    {icon:'🌊',color:'var(--blue-bg)',label:'Overwatering / Root Hypoxia',
+     symptoms:['Uniform yellowing similar to N deficiency','Wilting despite saturated substrate','Soft, mushy dark-brown root tips','Slow growth; failure to respond to fertilizer changes'],
+     cause:'Excessive irrigation frequency; poor drainage; substrate compaction; container sitting in standing water.',
+     rx:"Allow substrate to partially dry between irrigations (lift-test for weight). Improve drainage. Treat for Pythium/root rot if roots are mushy. Remove standing water from saucers. Consider air prune containers or raised bench growing.",
+     rxClass:'rx-box rx-blue'},
+  ],
+  ph:[
+    {icon:'⬆️',color:'var(--amber-bg)',label:'High pH — Micronutrient Lockout (pH > 6.8)',
+     symptoms:['Fe chlorosis on new growth (pH 6.5–7.0+)','Mn, Zn, Cu, B deficiencies at pH 7.0+','Fertilizer response failure despite correct PPM/EC','White crusty residue on substrate surface (bicarbonate)'],
+     cause:'Alkaline source water with high bicarbonate; calcareous substrate; over-liming; concrete leaching near acid-loving plants.',
+     rx:"Lower pH: apply Acid Special 17-6-6, inject acid (phosphoric or citric) into irrigation water, or switch to 12-4-16 Tap Water FeED which naturally acidifies. Use chelated micronutrient formulas (Petunia FeED, Mum FeED) which remain available at elevated pH. Test substrate pH with pH meter pour-through method.",
+     rxClass:'rx-box rx-amber'},
+    {icon:'⬇️',color:'var(--red-bg)',label:'Low pH — Mn & Fe Toxicity (pH < 5.5)',
+     symptoms:['Tan/brown speckling and marginal burn on older leaves','Mn toxicity in sensitive crops at pH < 5.5','Fe toxicity (blue-green leaves turning brown) at pH < 4.5','Root damage below pH 4.5'],
+     cause:'Over-acidification; acidic water source; excessive use of acid formulas; peat substrate acidifying over time.',
+     rx:"Raise pH using basic fertilizer (20-10-20 Peat-Lite), flowable limestone (calcium carbonate), or potassium bicarbonate. Reduce or eliminate use of acid fertilizers (17-6-6 Acid Special, 7-3-3 Hydrangea Blue). Monitor substrate pH weekly in peat-based media — peat naturally acidifies over 8–10 weeks.",
+     rxClass:'rx-box rx-red'},
+    {icon:'🔄',color:'var(--blue-bg)',label:'pH Drift / Instability in Recirculating Systems',
+     symptoms:['EC changes without nutrient additions','pH rising or falling rapidly in reservoir','Inconsistent plant response despite consistent feeding','Algae growth in reservoir (raises pH)'],
+     cause:'Biological activity (algae, microbes) altering pH; bicarbonate buffering from water source; nutrient uptake imbalances changing ionic charge balance.',
+     rx:"Cover reservoir to block light (prevents algae). Use acidified water if pH rises consistently. Monitor pH daily in recirculating systems. Partial reservoir changes (dump 30–50% and refill with fresh mix) restore ion balance. In DWC, maintain DO (dissolved oxygen) above 8 ppm.",
+     rxClass:'rx-box rx-blue'},
+    {icon:'🧂',color:'var(--orange-bg)',label:'Substrate Salt Accumulation (High TDS)',
+     symptoms:['White crystalline deposits on soil or pot surface','Outer leaf margin burn progressing inward','Roots avoiding outer substrate zones','Reduced water uptake and plant vigor'],
+     cause:'Hard water with high alkalinity; excessive fertilizer without leaching; poor drainage.',
+     rx:"Flush with 2–3× pot volume of clean water. Use RO or softer water if source water TDS exceeds 200 ppm. Implement monthly flushing protocol. Use subirrigation where possible to reduce surface salt accumulation. Switch to 15-5-20 RO FeED to avoid adding further mineral load.",
+     rxClass:'rx-box rx-amber'},
+  ],
+};
+
+function buildTroubleshooting(){
+  function buildGrid(containerId, items){
+    var container = document.getElementById(containerId);
+    if(!container) return;
+    items.forEach(function(item){
+      var div = document.createElement('div');
+      div.className = 'symptom-card';
+      div.style.borderTopColor = item.color;
+      div.style.borderTopWidth = '3px';
+      div.innerHTML =
+        '<button class="acc-hd" style="background:'+item.color+';border-radius:0" onclick="toggleSymptom(this)">'+
+          '<span class="sc-icon">'+item.icon+'</span> '+item.label+
+          ' <span class="chev">▶</span>'+
+        '</button>'+
+        '<div class="sc-body acc-bd">'+
+          '<div style="margin-bottom:.4rem;font-family:var(--fh);font-size:.58rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)">Visual Symptoms</div>'+
+          '<ul>'+item.symptoms.map(function(s){return'<li>'+s+'</li>';}).join('')+'</ul>'+
+          '<div style="margin-top:.5rem;margin-bottom:.3rem;font-family:var(--fh);font-size:.58rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)">Root Cause</div>'+
+          item.cause+
+          '<div class="'+item.rxClass+'">'+
+            '<div style="font-family:var(--fh);font-size:.56rem;font-weight:900;letter-spacing:.09em;text-transform:uppercase;margin-bottom:.3rem">Rx — Corrective Action</div>'+
+            item.rx+
+          '</div>'+
+        '</div>';
+      container.appendChild(div);
+    });
+  }
+  buildGrid('sympt-grid-macro', SYMPTOMS.macro);
+  buildGrid('sympt-grid-micro', SYMPTOMS.micro);
+  buildGrid('sympt-grid-tox',   SYMPTOMS.tox);
+  buildGrid('sympt-grid-ph',    SYMPTOMS.ph);
+}
+
+function toggleSymptom(btn){
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('open');
+}
+
+/* ════════════════════════════════════════════
+   CUSTOM NPK CALCULATOR
+════════════════════════════════════════════ */
+
+// Map of unit keys to grams conversion (grams that unit represents per gallon)
+var RATE_UNITS = {
+  gpg:        {label:'grams per gallon',  toGpg: function(v){ return v; }},
+  tsp_eighth: {label:'⅛ tsp per gallon', toGpg: function(){ return 0.74; }},
+  tsp_quarter:{label:'¼ tsp per gallon',  toGpg: function(){ return 1.48; }},
+  tsp_half:   {label:'½ tsp per gallon',  toGpg: function(){ return 2.95; }},
+  tsp_3q:     {label:'¾ tsp per gallon',  toGpg: function(){ return 4.43; }},
+  tsp_1:      {label:'1 tsp per gallon',  toGpg: function(){ return 5.90; }},
+  tsp_1h:     {label:'1½ tsp per gallon', toGpg: function(){ return 8.85; }},
+  tsp_2:      {label:'2 tsp per gallon',  toGpg: function(){ return 11.80; }},
+  tbsp_1:     {label:'1 tbsp per gallon', toGpg: function(){ return 17.70; }},
+  tbsp_2:     {label:'2 tbsp per gallon', toGpg: function(){ return 35.40; }},
+  oz_1:       {label:'1 dry oz per gallon',toGpg: function(){ return 28.35; }},
+  oz_2:       {label:'2 dry oz per gallon',toGpg: function(){ return 56.70; }},
+  oz_4:       {label:'4 dry oz per gallon',toGpg: function(){ return 113.40; }},
+  oz_8:       {label:'8 dry oz (½ lb) per gallon',toGpg: function(){ return 226.80; }},
+  oz_16:      {label:'16 dry oz (1 lb) per gallon',toGpg: function(){ return 453.60; }},
+};
+
+function custRateUnitChange(){
+  var unit = document.getElementById('cust-rate-unit').value;
+  var lbl  = document.getElementById('cust-rate-lbl');
+  var inp  = document.getElementById('cust-gpg');
+  var ru   = RATE_UNITS[unit];
+  if(unit === 'gpg'){
+    lbl.textContent = 'Application rate (grams per gallon)';
+    inp.style.display = 'block';
+    inp.min = '0.01'; inp.max = '500'; inp.step = '0.01'; inp.value = '3.8';
+  } else {
+    lbl.textContent = ru.label + ' (fixed)';
+    inp.style.display = 'none'; // fixed value from unit
+  }
+  calcCustom();
+}
+
+function getGpg(){
+  var unit = document.getElementById('cust-rate-unit').value;
+  var ru   = RATE_UNITS[unit];
+  if(unit === 'gpg'){
+    return parseFloat(document.getElementById('cust-gpg').value) || 3.8;
+  }
+  return ru.toGpg();
+}
+
+function calcCustom(){
+  var N   = parseFloat(document.getElementById('cust-n').value)   || 0;
+  var P   = parseFloat(document.getElementById('cust-p').value)   || 0;
+  var K   = parseFloat(document.getElementById('cust-k').value)   || 0;
+  var gpg = getGpg();
+  var factor = parseFloat(document.getElementById('cust-factor').value) || 700;
+  var label  = document.getElementById('cust-label').value.trim() || (N+'-'+P+'-'+K);
+  var unitKey = document.getElementById('cust-rate-unit').value;
+  var unitLabel = RATE_UNITS[unitKey] ? RATE_UNITS[unitKey].label : 'grams per gallon';
+
+  var emptyEl   = document.getElementById('cust-empty');
+  var metricsEl = document.getElementById('cust-metrics');
+
+  if(!N && !P && !K){
+    emptyEl.style.display='block';
+    metricsEl.style.display='none';
+    return;
+  }
+  emptyEl.style.display='none';
+  metricsEl.style.display='block';
+
+  /* PPM per gram per gallon for each element
+     Standard approximation: 1g/gal of a 100% pure element ≈ 264 ppm
+     For NPK fertilizer: ppm of nutrient = (% / 100) * g/gal * 1000 / 3.785
+     Simplified industry standard: total dissolved solids ppm ≈ gpg * (N+P+K)/100 * ~264
+     We use the direct approach: element ppm = (element% / 100) * grams_per_gallon * (1000/3.785)
+  */
+  var convFactor = 1000 / 3.785; // mg/L per g/L = ppm per g/gal
+
+  // Volume table rows
+  var volumes = [
+    {label:'1 oz',       gal: 1/128},
+    {label:'2 oz',       gal: 2/128},
+    {label:'4 oz',       gal: 4/128},
+    {label:'8 oz (½ pt)',gal: 8/128},
+    {label:'16 oz (1 pt)',gal:16/128},
+    {label:'32 oz (1 qt)',gal:32/128},
+    {label:'½ gallon',   gal:0.5},
+    {label:'1 gallon',   gal:1},
+    {label:'2 gallons',  gal:2},
+    {label:'5 gallons',  gal:5},
+    {label:'10 gallons', gal:10},
+    {label:'20 gallons', gal:20},
+    {label:'25 gallons', gal:25},
+    {label:'50 gallons', gal:50},
+    {label:'100 gallons',gal:100},
+  ];
+
+  // Spoon / oz reference per gallon — complete from ⅛ tsp through 1 lb
+  var spoons = [
+    {label:'⅛ tsp',        g:0.74,   use:'Seedling / ultra-light CLF'},
+    {label:'¼ tsp',        g:1.48,   use:'Indoor light CLF constant-feed'},
+    {label:'⅓ tsp',        g:1.97,   use:'Light indoor CLF'},
+    {label:'½ tsp',        g:2.95,   use:'Indoor standard CLF / light foliar'},
+    {label:'¾ tsp',        g:4.43,   use:'Standard CLF / light outdoor'},
+    {label:'1 tsp',        g:5.90,   use:'Outdoor standard / hydro full-rate'},
+    {label:'1¼ tsp',       g:7.38,   use:'Strong CLF / heavy indoor'},
+    {label:'1½ tsp',       g:8.85,   use:'Heavy feeder CLF'},
+    {label:'2 tsp',        g:11.80,  use:'Heavy CLF'},
+    {label:'1 tbsp (3 tsp)',g:17.70, use:'Full outdoor / once-weekly drench'},
+    {label:'1½ tbsp',      g:26.55,  use:'Strong weekly drench'},
+    {label:'2 tbsp',       g:35.40,  use:'Heavy weekly drench'},
+    {label:'3 tbsp',       g:53.10,  use:'Maximum weekly drench rate'},
+    {label:'¼ dry oz',     g:7.09,   use:'Small batch reference'},
+    {label:'½ dry oz',     g:14.17,  use:'Batch reference'},
+    {label:'1 dry oz',     g:28.35,  use:'Pro batch mixing reference'},
+    {label:'2 dry oz',     g:56.70,  use:'2-gal batch reference'},
+    {label:'4 dry oz',     g:113.4,  use:'5-gal batch reference'},
+    {label:'8 dry oz (½ lb)',g:226.8,use:'25–30 gal batch reference'},
+    {label:'16 dry oz (1 lb)',g:453.6,use:'50–75 gal CLF batch'},
+  ];
+
+  // Per-gallon at label rate
+  var nPpmPerGal = (N/100) * gpg * convFactor;
+  var pPpmPerGal = (P/100) * gpg * convFactor;
+  var kPpmPerGal = (K/100) * gpg * convFactor;
+  var totalPpmPerGal = nPpmPerGal + pPpmPerGal + kPpmPerGal;
+  var ecPerGal = (totalPpmPerGal / factor).toFixed(2);
+
+  // Metric cards
+  document.getElementById('cust-metric-cards').innerHTML =
+    metric('Formula', label, N+'-'+P+'-'+K+' NPK') +
+    metric('Rate', gToM(gpg), gpg.toFixed(2)+'g/gal · '+unitLabel) +
+    metric('Total PPM / gal', Math.round(totalPpmPerGal)+' ppm', 'at entered rate') +
+    metric('EC / gal', ecPerGal+' mS/cm', 'using '+factor+'× factor') +
+    metric('N ppm / gal', Math.round(nPpmPerGal)+' ppm', N+'% N') +
+    metric('P ppm / gal', Math.round(pPpmPerGal)+' ppm', P+'% P₂O₅') +
+    metric('K ppm / gal', Math.round(kPpmPerGal)+' ppm', K+'% K₂O');
+
+  // Volume table — grams needed per batch, PPM is concentration (constant per gallon)
+  var vtbody = document.getElementById('cust-vol-body');
+  vtbody.innerHTML = '';
+  volumes.forEach(function(v){
+    var g    = gpg * v.gal;
+    // PPM is a concentration — it does NOT change with volume at constant dose rate
+    var tPpm = Math.round(totalPpmPerGal);
+    var ecV  = (tPpm/factor).toFixed(2);
+    var rawOzVal = g/28.3495;
+    var ozStr = rawOzVal < 0.01 ? '<0.01 oz' : rawOzVal.toFixed(3)+' dry oz';
+    var lb   = gToLb(g);
+    // Also show ⅛-tsp equivalent
+    var meas = gToM(g);
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="bold">'+v.label+'</td>'+
+      '<td class="mono">'+g.toFixed(3)+'g</td>'+
+      '<td>'+meas+'</td>'+
+      '<td class="mono">'+ozStr+'</td>'+
+      '<td class="mono">'+(lb||'—')+'</td>'+
+      '<td class="mono bold">'+tPpm+' ppm</td>'+
+      '<td class="mono">'+Math.round(nPpmPerGal)+' ppm</td>'+
+      '<td class="mono">'+Math.round(pPpmPerGal)+' ppm</td>'+
+      '<td class="mono">'+Math.round(kPpmPerGal)+' ppm</td>'+
+      '<td class="mono">'+ecV+'</td>';
+    vtbody.appendChild(tr);
+  });
+
+  // Spoon table per gallon
+  var stbody = document.getElementById('cust-spoon-body');
+  stbody.innerHTML = '';
+  spoons.forEach(function(sp){
+    var nP  = Math.round((N/100)*sp.g*convFactor);
+    var pP  = Math.round((P/100)*sp.g*convFactor);
+    var kP  = Math.round((K/100)*sp.g*convFactor);
+    var tP  = nP+pP+kP;
+    var ecS = (tP/factor).toFixed(2);
+    var tr  = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="bold">'+sp.label+'</td>'+
+      '<td class="mono">'+sp.g.toFixed(2)+'g</td>'+
+      '<td class="mono bold">'+tP+' ppm</td>'+
+      '<td class="mono">'+nP+' ppm</td>'+
+      '<td class="mono">'+pP+' ppm</td>'+
+      '<td class="mono">'+kP+' ppm</td>'+
+      '<td class="mono">'+ecS+'</td>'+
+      '<td class="text-muted">'+sp.use+'</td>';
+    stbody.appendChild(tr);
+  });
+}
+
+/* ════════════════════════════════════════════
+   COLLAPSIBLE SECTIONS
+════════════════════════════════════════════ */
+function toggleSection(id, btn){
+  var body = document.getElementById(id);
+  if(!body) return;
+  var isOpen = !body.classList.contains('collapsed');
+  if(isOpen){
+    body.classList.add('collapsed');
+    btn.classList.add('collapsed');
+    btn.setAttribute('aria-expanded','false');
+  } else {
+    body.classList.remove('collapsed');
+    btn.classList.remove('collapsed');
+    btn.setAttribute('aria-expanded','true');
+  }
+}
+
+// Set initially-collapsed sections' chevrons on load
+function initCollapsibles(){
+  document.querySelectorAll('.section-title').forEach(function(btn){
+    var expanded = btn.getAttribute('aria-expanded');
+    if(expanded === 'false') btn.classList.add('collapsed');
+  });
+}
+
+/* ════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════ */
+buildPicker();
+buildTroubleshooting();
+renderMethodBanner();
+initCollapsibles();
+</script>
+</body>
+</html>
